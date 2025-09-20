@@ -1,0 +1,137 @@
+general:
+  source_directory: "."
+  destination_directory: "./organized"
+  dry_run: false
+  verbose: true
+  preserve_originals: true
+  skip_duplicates: true
+  log_file: "lenslogic.log"
+
+file_types:
+  images:
+    - jpg
+    - jpeg
+    - png
+    - gif
+    - bmp
+    - tiff
+    - webp
+    - heic
+    - heif
+  raw:
+    - raw
+    - cr2
+    - cr3
+    - nef
+    - arw
+    - orf
+    - dng
+    - raf
+    - rw2
+    - pef
+    - srw
+    - x3f
+  videos:
+    - mp4
+    - avi
+    - mov
+    - mkv
+    - wmv
+    - flv
+    - webm
+    - m4v
+    - mpg
+    - mpeg
+
+organization:
+  folder_structure: "{year}/{month:02d}/{day:02d}"
+  folder_structure_with_location: "{year}/{month:02d}/{day:02d}/{city}"
+  separate_raw: true
+  raw_folder: "RAW"
+  jpg_folder: "JPG"
+  video_folder: "VIDEOS"
+  unknown_folder: "UNKNOWN"
+
+  date_sources:
+    - datetime_original
+    - datetime_digitized
+    - datetime
+    - file_modified
+    - file_created
+
+naming:
+  pattern: "{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}{second:02d}_{camera}_{original_name}"
+  include_sequence: true
+  sequence_padding: 3
+  lowercase_extension: true
+
+  replacements:
+    " ": "_"
+    "-": "_"
+
+  camera_names:
+    "Canon EOS R5": "R5"
+    "Canon EOS 5D Mark IV": "5D4"
+    "NIKON D850": "D850"
+    "SONY ILCE-7RM4": "A7R4"
+    # Example custom iPhone mappings (exact match required):
+    # "Apple iPhone 15 Pro Max": "iphone15pm"
+    # "Apple iPhone 14 Pro": "iphone14p"
+
+features:
+  extract_gps: true
+  create_sidecar: true
+  generate_thumbnails: false
+  detect_faces: false
+  auto_rotate: true
+  remove_duplicates: true
+
+geolocation:
+  enabled: true
+  reverse_geocode: true
+  add_location_to_folder: false
+  location_folder_pattern: "{country}/{city}"
+  location_components: "city"  # Options: "city", "country", "city_country", "country_city"
+  cache_lookups: true
+
+duplicate_detection:
+  method: "hash"  # hash, pixel, histogram
+  threshold: 0.95
+  action: "skip"  # skip, rename, move
+  duplicate_folder: "DUPLICATES"
+
+image_processing:
+  auto_rotate: true
+  auto_enhance: false
+  generate_thumbnails: false
+  thumbnail_sizes: [200, 400, 800]
+
+session_detection:
+  time_gap_minutes: 30
+  min_photos_per_session: 3
+  same_location_threshold_km: 1.0
+  enable_location_grouping: true
+
+statistics:
+  enable_charts: true
+  chart_output_dir: "charts"
+
+backup:
+  enable_verification: true
+  incremental_mode: true
+  checksum_cache: ".lenslogic_checksums.json"
+  destinations: []
+  exclude_patterns: [".DS_Store", "Thumbs.db", "*.tmp"]
+  use_trash: true
+
+social_media:
+  platforms:
+    instagram:
+      default_format: "square"
+      quality: 95
+    facebook:
+      default_format: "post"
+      quality: 85
+    twitter:
+      default_format: "post"
+      quality: 85
