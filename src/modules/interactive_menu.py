@@ -22,6 +22,7 @@ class InteractiveMenu:
 
         choices = [
             "🚀 Quick Organize (with current settings)",
+            "🎯 Organize with Custom Destination",
             "⚙️  Configure Settings",
             "📖 Explain Configuration Settings",
             "📁 Select Source Directory",
@@ -45,6 +46,8 @@ class InteractiveMenu:
         if choice:
             if "Quick Organize" in choice:
                 return "organize"
+            elif "Custom Destination" in choice:
+                return "organize_custom"
             elif "Configure Settings" in choice:
                 return "configure"
             elif "Explain Configuration" in choice:
@@ -177,6 +180,25 @@ class InteractiveMenu:
         self.config_manager.set('general.preserve_originals', preserve)
 
         self.console.print("[green]✓[/green] Directory settings updated")
+
+    def get_custom_destination(self) -> Optional[str]:
+        """Get a custom destination directory from the user for one-time use"""
+        self.console.print("\n[bold cyan]Custom Destination for This Session[/bold cyan]")
+        self.console.print("[dim]This will not change your saved configuration.[/dim]\n")
+
+        current_dest = self.config_manager.get('general.destination_directory', './organized')
+        self.console.print(f"[dim]Current configured destination: {current_dest}[/dim]")
+
+        custom_dest = questionary.path(
+            "Choose custom destination for this organization:",
+            default=str(Path(current_dest).parent / "custom_organize"),
+            only_directories=True
+        ).ask()
+
+        if custom_dest:
+            self.console.print(f"[green]✓[/green] Will organize to: {custom_dest}")
+            return custom_dest
+        return None
 
     def _configure_naming(self):
         self.console.print("\n[bold]File Naming Configuration[/bold]\n")
