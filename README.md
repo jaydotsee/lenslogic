@@ -87,6 +87,7 @@ lenslogic --export-gps locations.kml
 ```
 -s, --source          Source directory containing photos
 -d, --destination     Destination directory for organized photos
+--custom-destination  Custom destination for this run only (doesn't modify config)
 -c, --config         Path to custom configuration file
 --dry-run            Preview changes without modifying files
 -p, --pattern        File naming pattern
@@ -144,6 +145,7 @@ lenslogic --interactive
 
 The menu provides options for:
 - Quick organize with current settings
+- Organize with custom destination (one-time override)
 - Configure all settings interactively
 - Select directories
 - Preview changes (dry run)
@@ -318,7 +320,23 @@ lenslogic --social-media facebook --social-output ~/Social/Facebook
 
 Automatically resize and optimize images for social media platforms.
 
-### Example 9: Backup and Sync (New!)
+### Example 9: Custom Destination for Client Work (New!)
+
+```bash
+# Organize wedding photos to client-specific folder
+lenslogic --custom-destination ~/Projects/Smith-Wedding --source ~/Imports/Wedding
+
+# Preview organization to custom location
+lenslogic --custom-destination ~/Client/Jones-Event --dry-run
+
+# Interactive mode with custom destination option
+lenslogic --interactive
+# Then select "🎯 Organize with Custom Destination"
+```
+
+Perfect for organizing client work, wedding shoots, or project-specific photos without changing your main configuration.
+
+### Example 10: Backup and Sync (New!)
 
 ```bash
 # Backup to configured destinations

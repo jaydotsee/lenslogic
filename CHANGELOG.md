@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Custom Destination Override**: Specify custom destination for one-time organization without modifying saved configuration
+  - CLI flag: `--custom-destination` for client-specific projects
+  - Interactive menu option: "🎯 Organize with Custom Destination"
+  - Perfect for wedding shoots, client work, or project-specific organization
 - Initial public release of LensLogic
 - Smart photo and video organization using EXIF/metadata
 - Interactive menu system with Rich UI
