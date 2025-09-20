@@ -26,8 +26,14 @@ from modules.xmp_analyzer import XMPAnalyzer
 class LensLogic:
     def __init__(self, config_path: Optional[str] = None, args: Optional[Dict[str, Any]] = None):
         self.config_manager = ConfigManager(config_path)
+
+        # Store custom destination separately - don't save to config
+        self.custom_destination = None
         if args:
-            self.config_manager.update_from_args(args)
+            self.custom_destination = args.get('custom_destination')
+            # Remove custom_destination before passing to config manager
+            config_args = {k: v for k, v in args.items() if k != 'custom_destination'}
+            self.config_manager.update_from_args(config_args)
 
         self.config = self.config_manager.config
         self.setup_logging()
@@ -64,9 +70,18 @@ class LensLogic:
             ]
         )
 
-    def organize_photos(self, dry_run: bool = False):
+    def organize_photos(self, dry_run: bool = False, custom_destination: Optional[str] = None):
         source_dir = Path(self.config.get('general', {}).get('source_directory', '.'))
-        dest_dir = Path(self.config.get('general', {}).get('destination_directory', './organized'))
+
+        # Use custom destination if provided, or class custom_destination, otherwise use config destination
+        if custom_destination:
+            dest_dir = Path(custom_destination)
+            self.progress_tracker.print_info(f"Using custom destination: {dest_dir}")
+        elif self.custom_destination:
+            dest_dir = Path(self.custom_destination)
+            self.progress_tracker.print_info(f"Using custom destination: {dest_dir}")
+        else:
+            dest_dir = Path(self.config.get('general', {}).get('destination_directory', './organized'))
         preserve_originals = self.config.get('general', {}).get('preserve_originals', True)
         skip_duplicates = self.config.get('general', {}).get('skip_duplicates', True)
         create_sidecar = self.config.get('features', {}).get('create_sidecar', True)
@@ -257,6 +272,12 @@ class LensLogic:
             if action == "organize":
                 if self.interactive_menu.confirm_action("Start organizing photos?"):
                     self.organize_photos(dry_run=False)
+                    input("\nPress Enter to continue...")
+
+            elif action == "organize_custom":
+                custom_dest = self.interactive_menu.get_custom_destination()
+                if custom_dest and self.interactive_menu.confirm_action(f"Start organizing to {custom_dest}?"):
+                    self.organize_photos(dry_run=False, custom_destination=custom_dest)
                     input("\nPress Enter to continue...")
 
             elif action == "configure":
@@ -660,6 +681,7 @@ def main():
     # Basic options
     parser.add_argument('-s', '--source', type=str, help='Source directory containing photos')
     parser.add_argument('-d', '--destination', type=str, help='Destination directory for organized photos')
+    parser.add_argument('--custom-destination', type=str, help='Custom destination directory for this run only (overrides config)')
     parser.add_argument('-c', '--config', type=str, help='Path to configuration file')
     parser.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
     parser.add_argument('-p', '--pattern', type=str, help='File naming pattern')
@@ -709,6 +731,7 @@ def main():
     args_dict = {
         'source': args.source,
         'destination': args.destination,
+        'custom_destination': args.custom_destination,
         'dry_run': args.dry_run,
         'verbose': args.verbose and not args.quiet,
         'pattern': args.pattern,
@@ -790,6 +813,16 @@ def main():
 
     elif args.exif_info:
         organizer.show_exif_info()
+
+    elif args.source or args.custom_destination or args.dry_run:
+        # Direct organization with CLI arguments
+        dry_run = args_dict.get('dry_run', False)
+        custom_dest = args_dict.get('custom_destination')
+
+        if dry_run:
+            organizer.progress_tracker.print_info("Running in DRY RUN mode - no files will be modified")
+
+        organizer.organize_photos(dry_run=dry_run, custom_destination=custom_dest)
 
     else:
         # Default action: launch interactive mode
