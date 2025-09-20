@@ -318,6 +318,7 @@ python src/main.py --analyze --source "/path/to/organized"
 |---------|-------------|---------|
 | `--source` | Source directory containing photos | `--source "/Users/photos"` |
 | `--destination` | Destination for organized photos | `--destination "/Users/organized"` |
+| `--custom-destination` | Custom destination for this run only (doesn't modify config) | `--custom-destination "/Users/client-project"` |
 | `--config` | Custom configuration file | `--config "my_config.yaml"` |
 | `--dry-run` | Preview changes without executing | `--dry-run` |
 | `--verbose` | Enable detailed logging | `--verbose` |
@@ -674,6 +675,45 @@ python src/main.py --verify-backup --source "/Users/photographer/Photos"
 
 # Incremental backup (only changed files)
 python src/main.py --backup --source "/Users/photographer/Photos" --incremental
+```
+
+### Use Case 6: Client-Specific Organization
+
+**Scenario**: Wedding photographer needs to organize photos for different clients without changing main configuration.
+
+**Commands**:
+```bash
+# Organize Smith wedding photos to client folder
+python src/main.py --custom-destination "/Projects/Smith-Wedding-2025" --source "/Imports/Card1"
+
+# Preview Jones event organization
+python src/main.py --custom-destination "/Projects/Jones-Corporate-Event" --dry-run --source "/Imports/Event"
+
+# Interactive mode for client selection
+python src/main.py --interactive
+# Select "🎯 Organize with Custom Destination"
+```
+
+**Benefits**:
+- Main configuration remains unchanged
+- Client-specific destinations without config modifications
+- Perfect for project-based organization
+- Maintains all organization features (folders, naming, XMP files)
+
+**Result Structure**:
+```
+Projects/
+├── Smith-Wedding-2025/
+│   ├── RAW/
+│   │   └── 2025/03/15/
+│   │       └── 20250315_143022_R5_ceremony_001.cr3
+│   └── JPG/
+│       └── 2025/03/15/
+│           └── 20250315_143022_R5_ceremony_001.jpg
+└── Jones-Corporate-Event/
+    └── JPG/
+        └── 2025/03/20/
+            └── 20250320_100530_D850_meeting_001.jpg
 ```
 
 This comprehensive guide covers all aspects of using LensLogic, from basic setup to advanced professional workflows. Each example includes practical configurations and expected results to help you get the most out of the system.
