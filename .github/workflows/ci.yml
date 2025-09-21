@@ -56,7 +56,7 @@ jobs:
 
     - name: Upload coverage to Codecov (Ubuntu only)
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
@@ -103,7 +103,7 @@ jobs:
         echo "name=lenslogic-${{ matrix.os }}-$(date +%Y%m%d)-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.artifact_name.outputs.name }}
         path: dist/
