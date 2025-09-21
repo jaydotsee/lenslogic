@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.12']  # Test minimum and latest supported versions
 
     steps:
     - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
         pip install pytest pytest-cov
 
     - name: Lint with ruff (Ubuntu only)
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
       run: |
         pip install ruff
         ruff check src/ tests/
@@ -55,7 +55,7 @@ jobs:
         pytest tests/ -v --cov=src --cov-report=xml
 
     - name: Upload coverage to Codecov (Ubuntu only)
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -72,10 +72,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
+    - name: Set up Python 3.12
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: 3.12
 
     - name: Install dependencies
       run: |
