@@ -463,4 +463,4 @@ MIT License
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.# Local builds disabled - use manual build with ./build.sh or GitHub Actions
