@@ -56,7 +56,8 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller lenslogic.spec
+        # Use our custom spec file with all necessary Rich modules included
+        pyinstaller lenslogic.spec --clean
 
     - name: Create archive (Unix)
       if: matrix.os != 'windows-latest'
