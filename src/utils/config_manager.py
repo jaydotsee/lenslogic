@@ -172,3 +172,7 @@ class ConfigManager:
             self.set('naming.pattern', args['pattern'])
         if args.get('folder_structure'):
             self.set('organization.folder_structure', args['folder_structure'])
+        if args.get('create_xmp') is not None:
+            self.set('features.create_sidecar', args['create_xmp'])
+        if args.get('no_xmp') is not None:
+            self.set('features.create_sidecar', not args['no_xmp'])
