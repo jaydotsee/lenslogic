@@ -1,5 +1,8 @@
 """
 LensLogic branding and ASCII art utilities
+
+This module provides branding elements including ASCII logos and version information
+for display in the interactive interface and command-line output.
 """
 
 LENSLOGIC_LOGO = r"""
