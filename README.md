@@ -109,6 +109,8 @@ lenslogic --export-gps locations.kml
 --dry-run            Preview changes without modifying files
 -p, --pattern        File naming pattern
 -f, --folder-structure  Folder organization structure
+--create-xmp         Create XMP sidecar files with metadata
+--no-xmp             Disable XMP sidecar file creation
 --no-preserve        Move files instead of copying
 -v, --verbose        Enable verbose output
 --quiet              Suppress output except errors

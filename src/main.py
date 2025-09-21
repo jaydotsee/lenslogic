@@ -686,6 +686,8 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
     parser.add_argument('-p', '--pattern', type=str, help='File naming pattern')
     parser.add_argument('-f', '--folder-structure', type=str, help='Folder organization structure')
+    parser.add_argument('--create-xmp', action='store_true', help='Create XMP sidecar files with metadata')
+    parser.add_argument('--no-xmp', action='store_true', help='Disable XMP sidecar file creation')
     parser.add_argument('--no-preserve', action='store_true', help='Move files instead of copying')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
     parser.add_argument('--quiet', action='store_true', help='Suppress output except errors')
@@ -736,7 +738,9 @@ def main():
         'verbose': args.verbose and not args.quiet,
         'pattern': args.pattern,
         'folder_structure': args.folder_structure,
-        'preserve_originals': not args.no_preserve
+        'preserve_originals': not args.no_preserve,
+        'create_xmp': args.create_xmp,
+        'no_xmp': args.no_xmp
     }
 
     args_dict = {k: v for k, v in args_dict.items() if v is not None}

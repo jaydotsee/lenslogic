@@ -5,7 +5,11 @@ from typing import Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from utils.branding import print_logo
+from rich.columns import Columns
+from rich.layout import Layout
+from rich.text import Text
+from rich.align import Align
+from utils.branding import LENSLOGIC_LOGO, get_version_info
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +23,9 @@ class InteractiveMenu:
     def main_menu(self) -> Optional[str]:
         self.console.clear()
         self._print_header()
+
+        # Create organized menu sections
+        self._print_menu_sections()
 
         choices = [
             "🚀 Quick Organize (with current settings)",
@@ -38,9 +45,10 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "What would you like to do?",
+            "[bold bright_yellow]What would you like to do?[/bold bright_yellow]",
             choices=choices,
-            use_shortcuts=True
+            use_shortcuts=True,
+            instruction="[dim](Use ↑↓ arrows and Enter to select)[/dim]"
         ).ask()
 
         if choice:
@@ -76,18 +84,80 @@ class InteractiveMenu:
         return None
 
     def _print_header(self):
-        print_logo("simple")
+        self._print_enhanced_banner()
         self.console.print()
         self._print_config_summary()
         self.console.print()
 
-    def _print_config_summary(self):
-        """Display a summary of current configuration settings"""
-        # Create a summary table
-        table = Table(title="📋 Current Configuration Summary", show_header=True, header_style="bold cyan")
-        table.add_column("Setting", style="bold", width=20)
-        table.add_column("Value", style="green", width=50)
+    def _print_enhanced_banner(self):
+        """Print enhanced banner with full logo and version info"""
+        # Create the main logo text
+        logo_text = Text(LENSLOGIC_LOGO, style="bold cyan")
 
+        # Add version info below logo
+        version_text = Text("\n📸🎬 Smart photo & video organization powered by metadata", style="italic dim cyan")
+        version_info = get_version_info().strip()
+        version_text.append(f"\n{version_info}", style="dim white")
+
+        # Combine logo and version
+        banner_text = Text()
+        banner_text.append(logo_text)
+        banner_text.append(version_text)
+
+        # Create an eye-catching panel
+        banner_panel = Panel(
+            Align.center(banner_text),
+            border_style="bright_cyan",
+            padding=(1, 2),
+            title="[bold bright_white]🎯 Welcome to LensLogic[/bold bright_white]",
+            title_align="center"
+        )
+
+        self.console.print(banner_panel)
+
+    def _print_menu_sections(self):
+        """Print organized menu sections with visual grouping"""
+        # Create three columns for different function categories
+        quick_actions = Panel(
+            "[bold green]🚀 QUICK ACTIONS[/bold green]\n"
+            "• Quick Organize\n"
+            "• Custom Destination\n"
+            "• Preview Changes",
+            border_style="green",
+            padding=(1, 1),
+            width=25
+        )
+
+        configuration = Panel(
+            "[bold blue]⚙️  CONFIGURATION[/bold blue]\n"
+            "• Configure Settings\n"
+            "• Explain Settings\n"
+            "• Select Directories\n"
+            "• Save Configuration",
+            border_style="blue",
+            padding=(1, 1),
+            width=25
+        )
+
+        analysis = Panel(
+            "[bold yellow]📊 ANALYSIS & TOOLS[/bold yellow]\n"
+            "• Library Statistics\n"
+            "• XMP Library Report\n"
+            "• Export GPS Data\n"
+            "• Backup & Restore\n"
+            "• Advanced Options",
+            border_style="yellow",
+            padding=(1, 1),
+            width=25
+        )
+
+        # Display columns
+        columns = Columns([quick_actions, configuration, analysis], equal=True, expand=True)
+        self.console.print(columns)
+        self.console.print()
+
+    def _print_config_summary(self):
+        """Display enhanced configuration summary with status indicators"""
         # Get current configuration
         config = self.config_manager.config
 
@@ -100,24 +170,113 @@ class InteractiveMenu:
         geo_enabled = config.get('geolocation', {}).get('enabled', True)
         location_components = config.get('geolocation', {}).get('location_components', 'city')
         duplicate_detection = config.get('features', {}).get('remove_duplicates', True)
+        create_sidecar = config.get('features', {}).get('create_sidecar', True)
 
-        # Add rows to table
-        table.add_row("Source Directory", str(source_dir))
-        table.add_row("Destination Directory", str(dest_dir))
-        table.add_row("Folder Structure", folder_structure)
-        table.add_row("Naming Pattern", naming_pattern)
-        table.add_row("Separate RAW/JPEG", "✅ Yes" if separate_raw else "❌ No")
-        table.add_row("Geolocation", "✅ Enabled" if geo_enabled else "❌ Disabled")
-        if geo_enabled:
-            table.add_row("Location Format", location_components.replace('_', ' + ').title())
-        table.add_row("Duplicate Detection", "✅ Enabled" if duplicate_detection else "❌ Disabled")
+        # Create status indicators
+        def get_status_indicator(is_configured, value=None):
+            if value and str(value) not in ['Not set', 'Default']:
+                return "🟢"
+            elif is_configured:
+                return "🟡"
+            else:
+                return "🔴"
 
-        # Display the table in a panel
-        self.console.print(Panel(table, expand=False, border_style="cyan"))
+        # Create enhanced table
+        table = Table(show_header=True, header_style="bold bright_cyan", border_style="cyan")
+        table.add_column("Status", width=6)
+        table.add_column("Setting", style="bold white", width=18)
+        table.add_column("Current Value", style="bright_white", width=45)
+
+        # Add rows with status indicators
+        table.add_row(
+            get_status_indicator(source_dir != 'Not set', source_dir),
+            "Source Directory",
+            f"[dim]{source_dir}[/dim]" if source_dir == 'Not set' else f"[green]{source_dir}[/green]"
+        )
+        table.add_row(
+            get_status_indicator(dest_dir != 'Not set', dest_dir),
+            "Destination Directory",
+            f"[dim]{dest_dir}[/dim]" if dest_dir == 'Not set' else f"[green]{dest_dir}[/green]"
+        )
+        table.add_row(
+            get_status_indicator(True, folder_structure),
+            "Folder Structure",
+            f"[cyan]{folder_structure}[/cyan]"
+        )
+        table.add_row(
+            get_status_indicator(True, naming_pattern),
+            "Naming Pattern",
+            f"[cyan]{naming_pattern}[/cyan]"
+        )
+        table.add_row(
+            "🟢" if separate_raw else "🟡",
+            "RAW/JPEG Separation",
+            "✅ Separate folders" if separate_raw else "📁 Same folder"
+        )
+        table.add_row(
+            "🟢" if geo_enabled else "🔴",
+            "Geolocation",
+            f"✅ Enabled ({location_components.replace('_', ' + ').title()})" if geo_enabled else "❌ Disabled"
+        )
+        table.add_row(
+            "🟢" if duplicate_detection else "🟡",
+            "Duplicate Detection",
+            "✅ Enabled" if duplicate_detection else "❌ Disabled"
+        )
+        table.add_row(
+            "🟢" if create_sidecar else "🟡",
+            "XMP Sidecar Files",
+            "✅ Enabled" if create_sidecar else "❌ Disabled"
+        )
+
+        # Add configuration completeness indicator
+        total_settings = 8
+        configured_settings = sum([
+            1 if source_dir != 'Not set' else 0,
+            1 if dest_dir != 'Not set' else 0,
+            1 if folder_structure != 'Default' else 0,
+            1 if naming_pattern != 'Default' else 0,
+            1 if separate_raw else 0,
+            1 if geo_enabled else 0,
+            1 if duplicate_detection else 0,
+            1 if create_sidecar else 0
+        ])
+
+        completeness = configured_settings / total_settings * 100
+        completeness_bar = "█" * int(completeness // 10) + "░" * (10 - int(completeness // 10))
+
+        status_text = f"[bold]Configuration Status:[/bold] {completeness:.0f}% [{completeness_bar}]\n"
+        if completeness < 70:
+            status_text += "[yellow]💡 Tip: Configure source and destination directories to get started[/yellow]"
+        elif completeness < 90:
+            status_text += "[blue]🎯 Ready to organize! Consider customizing patterns for your workflow[/blue]"
+        else:
+            status_text += "[green]🚀 Fully configured and ready for professional photo organization![/green]"
+
+        # Display in an enhanced panel
+        config_panel = Panel(
+            status_text,
+            title="[bold bright_white]📋 Configuration Overview[/bold bright_white]",
+            border_style="bright_cyan",
+            padding=(1, 2)
+        )
+
+        self.console.print(config_panel)
+        self.console.print()
+        self.console.print(table)
 
     def configure_menu(self) -> bool:
         self.console.clear()
-        self.console.print("[bold cyan]Configuration Settings[/bold cyan]\n")
+
+        # Enhanced configuration header
+        config_header = Panel(
+            "[bold bright_cyan]⚙️  Configuration Center[/bold bright_cyan]\n"
+            "[dim]Customize LensLogic to match your photo organization workflow[/dim]",
+            border_style="bright_cyan",
+            padding=(1, 2)
+        )
+        self.console.print(config_header)
+        self.console.print()
 
         sections = [
             "📁 Directory Settings",
@@ -126,12 +285,14 @@ class InteractiveMenu:
             "🏷️  File Type Settings",
             "🗺️  Geolocation Settings",
             "🔍 Duplicate Detection",
+            "⚙️  Feature Settings",
             "⬅️  Back to Main Menu"
         ]
 
         choice = questionary.select(
-            "Select a category to configure:",
-            choices=sections
+            "[bold bright_yellow]Select a category to configure:[/bold bright_yellow]",
+            choices=sections,
+            instruction="[dim](Choose a setting category to customize)[/dim]"
         ).ask()
 
         if "Directory Settings" in choice:
@@ -146,6 +307,8 @@ class InteractiveMenu:
             self._configure_geolocation()
         elif "Duplicate" in choice:
             self._configure_duplicates()
+        elif "Feature Settings" in choice:
+            self._configure_features()
         elif "Back" in choice:
             return False
 
@@ -402,9 +565,55 @@ class InteractiveMenu:
 
         self.console.print("[green]✓[/green] Duplicate detection settings updated")
 
+    def _configure_features(self):
+        self.console.print("\n[bold]Feature Configuration[/bold]\n")
+
+        # XMP Sidecar Files
+        create_sidecar = questionary.confirm(
+            "Create XMP sidecar files with metadata?",
+            default=self.config_manager.get('features.create_sidecar', True)
+        ).ask()
+
+        self.config_manager.set('features.create_sidecar', create_sidecar)
+
+        if create_sidecar:
+            self.console.print("[dim]XMP sidecar files will be created alongside organized photos[/dim]")
+            self.console.print("[dim]These files contain metadata and are compatible with professional photo software[/dim]")
+        else:
+            self.console.print("[dim]XMP sidecar files will not be created[/dim]")
+
+        self.console.print()
+
+        # Auto-rotate images
+        auto_rotate = questionary.confirm(
+            "Auto-rotate images based on EXIF orientation?",
+            default=self.config_manager.get('features.auto_rotate', True)
+        ).ask()
+
+        self.config_manager.set('features.auto_rotate', auto_rotate)
+
+        # Remove duplicates
+        remove_duplicates = questionary.confirm(
+            "Enable duplicate detection and removal?",
+            default=self.config_manager.get('features.remove_duplicates', True)
+        ).ask()
+
+        self.config_manager.set('features.remove_duplicates', remove_duplicates)
+
+        self.console.print("[green]✓[/green] Feature settings updated")
+
     def advanced_menu(self) -> bool:
         self.console.clear()
-        self.console.print("[bold cyan]Advanced Options[/bold cyan]\n")
+
+        # Enhanced advanced menu header
+        advanced_header = Panel(
+            "[bold bright_magenta]🔧 Advanced Options[/bold bright_magenta]\n"
+            "[dim]Power user features for cache management, configuration, and maintenance[/dim]",
+            border_style="bright_magenta",
+            padding=(1, 2)
+        )
+        self.console.print(advanced_header)
+        self.console.print()
 
         options = [
             "🔄 Clear metadata cache",
@@ -417,8 +626,9 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "Select an option:",
-            choices=options
+            "[bold bright_yellow]Select an advanced option:[/bold bright_yellow]",
+            choices=options,
+            instruction="[dim](Advanced features for experienced users)[/dim]"
         ).ask()
 
         if "metadata cache" in choice:
@@ -499,7 +709,16 @@ class InteractiveMenu:
     def explain_config_settings(self):
         """Display comprehensive explanation of all configuration settings"""
         self.console.clear()
-        self.console.print("[bold cyan]📖 Configuration Settings Explained[/bold cyan]\n")
+
+        # Enhanced explanation header
+        explanation_header = Panel(
+            "[bold bright_blue]📖 Configuration Guide[/bold bright_blue]\n"
+            "[dim]Complete reference for all LensLogic configuration options and their effects[/dim]",
+            border_style="bright_blue",
+            padding=(1, 2)
+        )
+        self.console.print(explanation_header)
+        self.console.print()
 
         # Create explanation table
         table = Table(title="Complete Configuration Guide", show_header=True, header_style="bold cyan")
@@ -632,7 +851,16 @@ class InteractiveMenu:
     def backup_restore_menu(self):
         """Display backup and restore options"""
         self.console.clear()
-        self.console.print("[bold cyan]💾 Backup & Restore Options[/bold cyan]\n")
+
+        # Enhanced backup menu header
+        backup_header = Panel(
+            "[bold bright_green]💾 Backup & Restore Center[/bold bright_green]\n"
+            "[dim]Protect your organized photos with automated backup and restore functionality[/dim]",
+            border_style="bright_green",
+            padding=(1, 2)
+        )
+        self.console.print(backup_header)
+        self.console.print()
 
         choices = [
             "📋 Configure Backup Destinations",
@@ -645,9 +873,10 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "What would you like to do?",
+            "[bold bright_yellow]What would you like to do?[/bold bright_yellow]",
             choices=choices,
-            use_shortcuts=True
+            use_shortcuts=True,
+            instruction="[dim](Choose a backup or restore operation)[/dim]"
         ).ask()
 
         if choice:

@@ -2,7 +2,7 @@
 LensLogic branding and ASCII art utilities
 """
 
-LENSLOGIC_LOGO = """
+LENSLOGIC_LOGO = r"""
  ___       _______   ________   ________  ___       ________  ________  ___  ________
 |\  \     |\  ___ \ |\   ___  \|\   ____\|\  \     |\   __  \|\   ____\|\  \|\   ____\
 \ \  \    \ \   __/|\ \  \\ \  \ \  \___|\ \  \    \ \  \|\  \ \  \___|\ \  \ \  \___|
@@ -15,7 +15,7 @@ LENSLOGIC_LOGO = """
     Smart photo & video organization powered by metadata
 """
 
-LENSLOGIC_COMPACT = """
+LENSLOGIC_COMPACT = r"""
  ___       _______   ________   ________  ___       ________  ________  ___  ________
 |\  \     |\  ___ \ |\   ___  \|\   ____\|\  \     |\   __  \|\   ____\|\  \|\   ____\
 \ \  \    \ \   __/|\ \  \\ \  \ \  \___|\ \  \    \ \  \|\  \ \  \___|\ \  \ \  \___|
@@ -59,7 +59,7 @@ def print_logo(style="compact"):
 def get_version_info():
     """Get version and build information"""
     return """
-    Version: 1.0.0
+    Version: 1.0.1
     Build: Production
     License: MIT
     """
