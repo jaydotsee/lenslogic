@@ -70,8 +70,28 @@ python src/main.py --help
 # Build executable using PyInstaller
 pyinstaller lenslogic.spec
 
+# Build with security checks (recommended)
+./build.sh
+
 # The executable will be in the dist/ directory
 ./dist/lenslogic --help
+```
+
+### Development Automation
+
+**Git Hooks** - Automatic building and validation:
+
+```bash
+# Post-commit hook automatically builds after commits (already active)
+# Triggers on source code, config, or build file changes
+
+# Optional: Enable pre-commit validation
+mv .git/hooks/pre-commit.example .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+# Disable automation if needed
+chmod -x .git/hooks/post-commit  # Disable auto-build
+chmod -x .git/hooks/pre-commit   # Disable validation
 ```
 
 ## Usage
