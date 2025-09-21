@@ -1,5 +1,11 @@
 # LensLogic
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/jaydotsee/lenslogic)](https://github.com/jaydotsee/lenslogic/releases/latest)
+[![GitHub downloads](https://img.shields.io/github/downloads/jaydotsee/lenslogic/total)](https://github.com/jaydotsee/lenslogic/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/jaydotsee/lenslogic/releases)
+
 Smart photo organization powered by metadata. A comprehensive Python CLI tool for organizing photo and video libraries with advanced features including EXIF data extraction, geolocation, duplicate detection, and customizable organization patterns.
 
 ## Features
