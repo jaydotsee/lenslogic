@@ -99,6 +99,7 @@ jobs:
 
     - name: Create versioned artifact name
       id: artifact_name
+      shell: bash
       run: |
         echo "name=lenslogic-${{ matrix.os }}-$(date +%Y%m%d)-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 

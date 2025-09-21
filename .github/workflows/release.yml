@@ -87,6 +87,34 @@ jobs:
       with:
         files: |
           dist/${{ matrix.asset_name }}.*
-        generate_release_notes: true
+        generate_release_notes: false
+        body: |
+          ## LensLogic v1.0.1 - Enhanced Interactive UI and XMP Sidecar Options
+
+          ### New Features
+          - **Enhanced Interactive Mode**: Professional branding with full ASCII logo integration
+          - **XMP Sidecar File Options**: Control XMP metadata file creation with `--create-xmp` and `--no-xmp` flags
+          - **Visual Menu Organization**: Categorized panels (Quick Actions, Configuration, Analysis & Tools)
+          - **Configuration Status Tracking**: Status indicators and progress bars for setup completeness
+
+          ### UI Improvements
+          - Professional header with full logo and version information
+          - Color-coded status indicators (🟢🟡🔴) for configuration completeness
+          - Enhanced visual hierarchy with Rich panels and columns
+          - Better menu organization with helpful tips and context
+          - Improved configuration display with progress tracking
+
+          ### Configuration Enhancements
+          - New Feature Settings section in interactive mode for XMP sidecar toggle
+          - Updated configuration summary to include XMP file creation status
+          - CLI argument processing for XMP options
+          - Enhanced help documentation
+
+          ### Downloads
+          - **Windows**: `lenslogic-windows-x64.zip`
+          - **macOS (Apple Silicon)**: `lenslogic-macos-arm64.tar.gz`
+          - **Linux**: `lenslogic-linux-x64.tar.gz`
+
+          Each download includes SHA256 checksums for verification.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
