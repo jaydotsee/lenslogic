@@ -54,7 +54,7 @@ A comprehensive Python CLI tool for organizing photo and video libraries with ad
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/lenslogic.git
+git clone https://github.com/jaydotsee/lenslogic.git
 cd lenslogic
 
 # Install dependencies
