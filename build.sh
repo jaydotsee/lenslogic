@@ -292,34 +292,9 @@ if __name__ == "__main__":
     main()
 EOF
 
-# Run PyInstaller with comprehensive options
-"$PYTHON_PATH" -m PyInstaller --clean --onefile \
-  --add-data "config:config" \
-  --add-data "src:src" \
-  --console \
-  --name "LensLogic" \
-  --distpath "$ORIGINAL_DIR/dist" \
-  --hidden-import="exiftool" \
-  --hidden-import="pymediainfo" \
-  --hidden-import="rich" \
-  --hidden-import="questionary" \
-  --hidden-import="pathlib" \
-  --hidden-import="yaml" \
-  --icon="$ORIGINAL_DIR/icon.ico" \
-  lenslogic_launcher.py 2>/dev/null || \
-"$PYTHON_PATH" -m PyInstaller --clean --onefile \
-  --add-data "config:config" \
-  --add-data "src:src" \
-  --console \
-  --name "LensLogic" \
-  --distpath "$ORIGINAL_DIR/dist" \
-  --hidden-import="exiftool" \
-  --hidden-import="pymediainfo" \
-  --hidden-import="rich" \
-  --hidden-import="questionary" \
-  --hidden-import="pathlib" \
-  --hidden-import="yaml" \
-  lenslogic_launcher.py
+# Use our custom spec file with all Rich modules properly configured
+echo "📦 Using custom lenslogic.spec with comprehensive module support..."
+"$PYTHON_PATH" -m PyInstaller "$ORIGINAL_DIR/lenslogic.spec" --clean --distpath "$ORIGINAL_DIR/dist"
 
 # Return to original directory
 cd "$ORIGINAL_DIR"
