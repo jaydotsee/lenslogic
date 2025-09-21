@@ -6,7 +6,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.columns import Columns
-from rich.layout import Layout
 from rich.text import Text
 from rich.align import Align
 from utils.branding import LENSLOGIC_LOGO, get_version_info
@@ -979,7 +978,6 @@ class InteractiveMenu:
     def _perform_backup(self, source_dir: str, destinations: list):
         """Perform the actual backup process"""
         from modules.backup_manager import BackupManager
-        from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
         # Initialize backup manager
         backup_manager = BackupManager(self.config_manager.config)
@@ -1340,7 +1338,7 @@ class InteractiveMenu:
         ).ask()
 
         # Confirm restore
-        self.console.print(f"\n[bold yellow]⚠️ Restore Summary:[/bold yellow]")
+        self.console.print("\n[bold yellow]⚠️ Restore Summary:[/bold yellow]")
         self.console.print(f"  • From: {backup_dir}")
         self.console.print(f"  • To: {restore_dir}")
         self.console.print(f"  • Files: {selected_backup_info['total_files']:,}")
