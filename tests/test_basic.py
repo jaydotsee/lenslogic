@@ -18,6 +18,11 @@ class TestBasicFunctionality:
             from utils.config_manager import ConfigManager
             from utils.progress_tracker import ProgressTracker
             from utils.camera_slugger import CameraSlugger
+
+            # Test that classes can be instantiated
+            assert ConfigManager is not None
+            assert ProgressTracker is not None
+            assert CameraSlugger is not None
             assert True
         except ImportError:
             assert False, "Essential imports failed"

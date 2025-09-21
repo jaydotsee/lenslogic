@@ -3,7 +3,6 @@ Pytest configuration and fixtures for LensLogic tests
 """
 
 import pytest
-from pathlib import Path
 from unittest.mock import MagicMock
 from datetime import datetime
 
