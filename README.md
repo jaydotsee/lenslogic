@@ -1,4 +1,11 @@
-# LensLogic
+```
+ ██▓    ▓█████  ███▄    █   ██████  ██▓     ▒█████    ▄████  ██▓ ▄████▄
+▓██▒    ▓█   ▀  ██ ▀█   █ ▒██    ▒ ▓██▒    ▒██▒  ██▒ ██▒ ▀█▒▓██▒▒██▀ ▀█
+▒██░    ▒███   ▓██  ▀█ ██▒░ ▓██▄   ▒██░    ▒██░  ██▒▒██░▄▄▄░▒██▒▒▓█    ▄
+▒██░    ▒▓█  ▄ ▓██▒  ▐▌██▒  ▒   ██▒▒██░    ▒██   ██░░▓█  ██▓░██░▒▓▓▄ ▄██▒
+░██████▒░▒████▒▒██░   ▓██░▒██████▒▒░██████▒░ ████▓▒░░▒▓███▀▒░██░▒ ▓███▀ ░
+ Smart photo & video organization powered by metadata
+```
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/jaydotsee/lenslogic)](https://github.com/jaydotsee/lenslogic/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/jaydotsee/lenslogic/total)](https://github.com/jaydotsee/lenslogic/releases)
@@ -6,7 +13,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/jaydotsee/lenslogic/releases)
 
-Smart photo organization powered by metadata. A comprehensive Python CLI tool for organizing photo and video libraries with advanced features including EXIF data extraction, geolocation, duplicate detection, and customizable organization patterns.
+A comprehensive Python CLI tool for organizing photo and video libraries with advanced features including EXIF data extraction, geolocation, duplicate detection, and customizable organization patterns.
 
 ## Features
 
@@ -393,6 +400,36 @@ pyinstaller --onefile --name lenslogic \
 - For large libraries (>10,000 files), consider processing in batches
 - Use hash-based duplicate detection for speed
 - Disable verbose output for faster processing
+
+## Logo & Branding
+
+LensLogic features multiple ASCII logo styles you can display:
+
+```bash
+# Display the logo
+lenslogic --logo
+
+# Different styles available in the app:
+```
+
+**Camera Style:**
+```
+╔══════════════════════════════════════╗
+║                                      ║
+║  📸🎬 LensLogic                      ║
+║     Smart photo & video organization ║
+║     powered by metadata              ║
+║                                      ║
+╚══════════════════════════════════════╝
+```
+
+**Simple Style:**
+```
+┌─ LensLogic ─────────────────────────────┐
+│ 📸🎬 Smart photo & video organization   │
+│     powered by metadata                 │
+└─────────────────────────────────────────┘
+```
 
 ## License
 
