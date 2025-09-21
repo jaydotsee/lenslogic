@@ -97,8 +97,9 @@ check_security_with_gitignore() {
     done < "$exclusions_file"
 
     # Look for potentially sensitive files that aren't excluded by gitignore
+    # Exclude default config files as they are templates, not sensitive
     local sensitive_files
-    sensitive_files=$(eval "$find_cmd" 2>/dev/null | grep -E '\.(key|secret|private|credential)$|\.env\.|config.*\.(yaml|yml|json)$|api.*key|token.*\.|password.*\.' | grep -v '__pycache__' | head -10)
+    sensitive_files=$(eval "$find_cmd" 2>/dev/null | grep -E '\.(key|secret|private|credential)$|\.env\.|config.*\.(yaml|yml|json)$|api.*key|token.*\.|password.*\.' | grep -v '__pycache__' | grep -v 'default_config\.' | grep -v 'config/default' | head -10)
 
     # Clean up temp file
     rm -f "$exclusions_file"
@@ -123,7 +124,9 @@ check_security_with_gitignore() {
 
 # Clean any previous builds
 echo "🧹 Cleaning previous builds..."
-rm -rf build/ dist/ *.spec
+rm -rf build/ dist/
+# Only remove auto-generated spec files, keep our custom lenslogic.spec
+find . -name "*.spec" -not -name "lenslogic.spec" -delete
 
 # Security scan using gitignore patterns
 check_security_with_gitignore
