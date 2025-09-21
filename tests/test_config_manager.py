@@ -2,12 +2,6 @@
 Tests for ConfigManager utility
 """
 
-import pytest
-import tempfile
-import yaml
-from pathlib import Path
-from unittest.mock import patch, mock_open
-
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
