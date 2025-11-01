@@ -218,3 +218,6 @@ statistics/
 # Claude specific
 .claude/
 CLAUDE.md
+.venv/
+.direnv/
+.env
