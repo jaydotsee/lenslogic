@@ -382,6 +382,7 @@ naming:
 | `{exposure}` | Shutter speed | `250` |
 | `{focal_length}` | Focal length | `85` |
 | `{original_name}` | Original filename | `IMG_1234` |
+| `{original_sequence}` | Sequence from original filename | `8151` (from ZF0_8151.JPG) |
 
 ### Folder Structure Templates
 

@@ -1,5 +1,6 @@
 import logging
 import re
+import random
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
@@ -73,10 +74,41 @@ class FileRenamer:
 
         return None
 
+    def _extract_original_sequence(self, original_name: str) -> str:
+        """
+        Extract sequence number from original filename.
+
+        Examples:
+            ZF0_8151.JPG -> 8151
+            DSC_1234.NEF -> 1234
+            IMG_5678.CR2 -> 5678
+            photo123.jpg -> 123
+            nosequence.jpg -> random 4-digit number
+
+        Args:
+            original_name: Original filename without extension
+
+        Returns:
+            Extracted sequence number as string, or random 4-digit number if not found
+        """
+        # Try to find the last sequence of digits in the filename
+        # This handles patterns like: DSC_1234, IMG_5678, ZF0_8151, etc.
+        matches = re.findall(r'\d+', original_name)
+
+        if matches:
+            # Return the last sequence of digits found (most likely the sequence number)
+            return matches[-1]
+        else:
+            # No sequence found, generate a random 4-digit number
+            random_seq = random.randint(1000, 9999)
+            logger.debug(f"No sequence found in '{original_name}', using random: {random_seq}")
+            return str(random_seq)
+
     def _create_template_variables(self, file_path: Path, metadata: Dict[str, Any],
                                   capture_datetime: datetime, original_name: str) -> Dict[str, Any]:
         variables = {
             'original_name': original_name,
+            'original_sequence': self._extract_original_sequence(original_name),
             'year': capture_datetime.year,
             'month': capture_datetime.month,
             'day': capture_datetime.day,

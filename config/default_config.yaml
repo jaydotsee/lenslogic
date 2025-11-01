@@ -60,6 +60,16 @@ organization:
     - file_created
 
 naming:
+  # Available pattern variables:
+  # {year}, {month}, {day}, {hour}, {minute}, {second}
+  # {date} (YYYYMMDD), {time} (HHMMSS), {timestamp}
+  # {camera}, {camera_make}, {camera_model}
+  # {lens}, {iso}, {f_number}, {exposure}, {focal_length}
+  # {original_name} - full original filename without extension
+  # {original_sequence} - extracted sequence from original filename (e.g., ZF0_8151.JPG -> 8151)
+  #                       If no sequence found, generates random 4-digit number
+  # {width}, {height}, {has_gps}, {latitude}, {longitude}
+  # {artist}, {software}
   pattern: "{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}{second:02d}_{camera}_{original_name}"
   include_sequence: true
   sequence_padding: 3

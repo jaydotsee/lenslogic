@@ -267,6 +267,7 @@ Available variables for naming patterns and folder structures:
 
 **Other:**
 - `{original_name}` - Original filename without extension
+- `{original_sequence}` - Sequence number extracted from original filename (e.g., ZF0_8151.JPG → 8151)
 
 ## Examples
 

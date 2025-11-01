@@ -664,6 +664,7 @@ Available variables for `naming.pattern`:
 | `{exposure}` | float | Shutter speed | `0.004` |
 | `{focal_length}` | float | Focal length | `85.0` |
 | `{original_name}` | str | Original filename | `IMG_1234` |
+| `{original_sequence}` | str | Sequence from original filename | `8151` (from ZF0_8151.JPG) |
 | `{width}` | int | Image width | `4032` |
 | `{height}` | int | Image height | `3024` |
 | `{has_gps}` | str | GPS indicator | `GPS` or `` |

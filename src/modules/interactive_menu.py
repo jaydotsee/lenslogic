@@ -44,10 +44,10 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "[bold bright_yellow]What would you like to do?[/bold bright_yellow]",
+            "What would you like to do?",
             choices=choices,
             use_shortcuts=True,
-            instruction="[dim](Use ↑↓ arrows and Enter to select)[/dim]"
+            instruction="(Use ↑↓ arrows and Enter to select)"
         ).ask()
 
         if choice:
@@ -289,9 +289,9 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "[bold bright_yellow]Select a category to configure:[/bold bright_yellow]",
+            "Select a category to configure:",
             choices=sections,
-            instruction="[dim](Choose a setting category to customize)[/dim]"
+            instruction="(Choose a setting category to customize)"
         ).ask()
 
         if "Directory Settings" in choice:
@@ -377,7 +377,8 @@ class InteractiveMenu:
         self.console.print("[dim]  {year}, {month}, {day}, {hour}, {minute}, {second}[/dim]")
         self.console.print("[dim]  {date}, {time}, {timestamp}[/dim]")
         self.console.print("[dim]  {camera}, {camera_make}, {camera_model}[/dim]")
-        self.console.print("[dim]  {original_name}, {iso}, {f_number}, {focal_length}[/dim]\n")
+        self.console.print("[dim]  {original_name}, {original_sequence}, {iso}, {f_number}, {focal_length}[/dim]")
+        self.console.print("[dim]  Note: {original_sequence} extracts numbers from original filename (e.g., ZF0_8151.JPG -> 8151)[/dim]\n")
 
         pattern_choice = questionary.select(
             "Select naming pattern:",
@@ -625,9 +626,9 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "[bold bright_yellow]Select an advanced option:[/bold bright_yellow]",
+            "Select an advanced option:",
             choices=options,
-            instruction="[dim](Advanced features for experienced users)[/dim]"
+            instruction="(Advanced features for experienced users)"
         ).ask()
 
         if "metadata cache" in choice:
@@ -838,7 +839,8 @@ class InteractiveMenu:
         self.console.print(table)
 
         self.console.print("\n[bold green]💡 Pro Tips:[/bold green]")
-        self.console.print("• Use {variables} in patterns: {year}, {month}, {day}, {camera}, {lens}")
+        self.console.print("• Use {variables} in patterns: {year}, {month}, {day}, {camera}, {lens}, {original_sequence}")
+        self.console.print("• {original_sequence} preserves sequence from original filename (e.g., ZF0_8151.JPG → 8151)")
         self.console.print("• Location folders: Set location_components to 'city' for clean organization")
         self.console.print("• XMP sidecars: Enable for professional photo/video workflow compatibility")
         self.console.print("• Backup verification: Ensures your backups are not corrupted")
@@ -872,10 +874,10 @@ class InteractiveMenu:
         ]
 
         choice = questionary.select(
-            "[bold bright_yellow]What would you like to do?[/bold bright_yellow]",
+            "What would you like to do?",
             choices=choices,
             use_shortcuts=True,
-            instruction="[dim](Choose a backup or restore operation)[/dim]"
+            instruction="(Choose a backup or restore operation)"
         ).ask()
 
         if choice:
