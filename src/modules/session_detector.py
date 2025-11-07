@@ -1,37 +1,27 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class SessionDetector:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.session_config = config.get("session_detection", {})
         self.time_gap_minutes = self.session_config.get("time_gap_minutes", 30)
-        self.min_photos_per_session = self.session_config.get(
-            "min_photos_per_session", 3
-        )
-        self.same_location_threshold_km = self.session_config.get(
-            "same_location_threshold_km", 1.0
-        )
-        self.enable_location_grouping = self.session_config.get(
-            "enable_location_grouping", True
-        )
+        self.min_photos_per_session = self.session_config.get("min_photos_per_session", 3)
+        self.same_location_threshold_km = self.session_config.get("same_location_threshold_km", 1.0)
+        self.enable_location_grouping = self.session_config.get("enable_location_grouping", True)
 
-    def detect_sessions(
-        self, photos_metadata: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def detect_sessions(self, photos_metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Detect shooting sessions from a list of photo metadata"""
         if not photos_metadata:
             return []
 
         # Sort photos by capture time
-        sorted_photos = sorted(
-            photos_metadata, key=lambda x: self._get_capture_time(x) or datetime.min
-        )
+        sorted_photos = sorted(photos_metadata, key=lambda x: self._get_capture_time(x) or datetime.min)
 
         sessions = []
         current_session = []
@@ -66,12 +56,10 @@ class SessionDetector:
             session["session_number"] = i
             session["session_name"] = self._generate_session_name(session, i)
 
-        logger.info(
-            f"Detected {len(sessions)} shooting sessions from {len(photos_metadata)} photos"
-        )
+        logger.info(f"Detected {len(sessions)} shooting sessions from {len(photos_metadata)} photos")
         return sessions
 
-    def _get_capture_time(self, metadata: Dict[str, Any]) -> Optional[datetime]:
+    def _get_capture_time(self, metadata: dict[str, Any]) -> datetime | None:
         """Extract capture time from metadata"""
         time_fields = [
             "datetime_original",
@@ -96,8 +84,8 @@ class SessionDetector:
         self,
         last_time: datetime,
         current_time: datetime,
-        current_session: List[Dict[str, Any]],
-        current_photo: Dict[str, Any],
+        current_session: list[dict[str, Any]],
+        current_photo: dict[str, Any],
     ) -> bool:
         """Determine if current photo belongs to the same session"""
         # Check time gap
@@ -112,9 +100,7 @@ class SessionDetector:
 
         return True
 
-    def _is_same_location(
-        self, current_session: List[Dict[str, Any]], current_photo: Dict[str, Any]
-    ) -> bool:
+    def _is_same_location(self, current_session: list[dict[str, Any]], current_photo: dict[str, Any]) -> bool:
         """Check if current photo is at the same location as session"""
         current_gps = current_photo.get("gps")
         if not current_gps:
@@ -125,9 +111,7 @@ class SessionDetector:
         for photo in current_session:
             photo_gps = photo.get("gps")
             if photo_gps and "latitude" in photo_gps and "longitude" in photo_gps:
-                session_locations.append(
-                    (photo_gps["latitude"], photo_gps["longitude"])
-                )
+                session_locations.append((photo_gps["latitude"], photo_gps["longitude"]))
 
         if not session_locations:
             return True  # No GPS data in session
@@ -143,36 +127,27 @@ class SessionDetector:
         if current_lat is None or current_lon is None:
             return True
 
-        distance_km = self._calculate_distance(
-            avg_lat, avg_lon, current_lat, current_lon
-        )
+        distance_km = self._calculate_distance(avg_lat, avg_lon, current_lat, current_lon)
         return distance_km <= self.same_location_threshold_km
 
-    def _calculate_distance(
-        self, lat1: float, lon1: float, lat2: float, lon2: float
-    ) -> float:
+    def _calculate_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Calculate distance between two GPS coordinates in kilometers"""
         import math
 
         # Haversine formula
-        R = 6371  # Earth radius in km
+        earth_radius_km = 6371  # Earth radius in km
 
         lat1_rad = math.radians(lat1)
         lat2_rad = math.radians(lat2)
         delta_lat = math.radians(lat2 - lat1)
         delta_lon = math.radians(lon2 - lon1)
 
-        a = (
-            math.sin(delta_lat / 2) ** 2
-            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
-        )
+        a = math.sin(delta_lat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-        return R * c
+        return earth_radius_km * c
 
-    def _create_session_info(
-        self, session_photos: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _create_session_info(self, session_photos: list[dict[str, Any]]) -> dict[str, Any]:
         """Create session information from list of photos"""
         start_time = self._get_capture_time(session_photos[0])
         end_time = self._get_capture_time(session_photos[-1])
@@ -227,9 +202,7 @@ class SessionDetector:
             "file_paths": [photo["file_path"] for photo in session_photos],
         }
 
-    def _generate_session_name(
-        self, session: Dict[str, Any], session_number: int
-    ) -> str:
+    def _generate_session_name(self, session: dict[str, Any], session_number: int) -> str:
         """Generate a descriptive name for the session"""
         start_time = session["start_time"]
         location_name = session.get("location_name")
@@ -258,11 +231,11 @@ class SessionDetector:
 
     def organize_by_sessions(
         self,
-        sessions: List[Dict[str, Any]],
+        sessions: list[dict[str, Any]],
         base_output_dir: str,
         session_folder_pattern: str = "{session_name}",
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Organize photos into session-based folder structure"""
         result = {
             "sessions_processed": 0,
@@ -279,12 +252,8 @@ class SessionDetector:
                 session_path = base_path / session_folder_name
 
                 if dry_run:
-                    logger.info(
-                        f"[DRY RUN] Would create session folder: {session_path}"
-                    )
-                    logger.info(
-                        f"[DRY RUN] Would organize {session['photo_count']} photos"
-                    )
+                    logger.info(f"[DRY RUN] Would create session folder: {session_path}")
+                    logger.info(f"[DRY RUN] Would organize {session['photo_count']} photos")
                 else:
                     session_path.mkdir(parents=True, exist_ok=True)
                     result["folders_created"].append(str(session_path))
@@ -299,7 +268,7 @@ class SessionDetector:
 
         return result
 
-    def get_session_statistics(self, sessions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def get_session_statistics(self, sessions: list[dict[str, Any]]) -> dict[str, Any]:
         """Generate statistics about detected sessions"""
         if not sessions:
             return {"total_sessions": 0}

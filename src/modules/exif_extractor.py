@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
-from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
+from typing import Any
+
 import exif
+from PIL import Image
+from PIL.ExifTags import GPSTAGS, TAGS
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ class ExifExtractor:
     def __init__(self):
         self.cache = {}
 
-    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> dict[str, Any]:
         file_path_obj = Path(file_path)
 
         if str(file_path_obj) in self.cache:
@@ -25,15 +26,9 @@ class ExifExtractor:
             "file_size": file_path_obj.stat().st_size if file_path_obj.exists() else 0,
             "file_extension": file_path_obj.suffix.lower(),
             "file_modified": (
-                datetime.fromtimestamp(file_path_obj.stat().st_mtime)
-                if file_path_obj.exists()
-                else None
+                datetime.fromtimestamp(file_path_obj.stat().st_mtime) if file_path_obj.exists() else None
             ),
-            "file_created": (
-                datetime.fromtimestamp(file_path_obj.stat().st_ctime)
-                if file_path_obj.exists()
-                else None
-            ),
+            "file_created": (datetime.fromtimestamp(file_path_obj.stat().st_ctime) if file_path_obj.exists() else None),
         }
 
         try:
@@ -79,7 +74,7 @@ class ExifExtractor:
         }
         return file_path.suffix.lower() in supported_extensions
 
-    def _extract_exif_data(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_exif_data(self, file_path: Path) -> dict[str, Any]:
         exif_dict = {}
 
         try:
@@ -88,13 +83,9 @@ class ExifExtractor:
 
                 if img.has_exif:
                     if hasattr(img, "datetime_original"):
-                        exif_dict["datetime_original"] = self._parse_datetime(
-                            img.datetime_original
-                        )
+                        exif_dict["datetime_original"] = self._parse_datetime(img.datetime_original)
                     if hasattr(img, "datetime_digitized"):
-                        exif_dict["datetime_digitized"] = self._parse_datetime(
-                            img.datetime_digitized
-                        )
+                        exif_dict["datetime_digitized"] = self._parse_datetime(img.datetime_digitized)
                     if hasattr(img, "datetime"):
                         exif_dict["datetime"] = self._parse_datetime(img.datetime)
 
@@ -126,9 +117,7 @@ class ExifExtractor:
                         exif_dict["copyright"] = img.copyright
 
         except Exception as e:
-            logger.debug(
-                f"Could not extract EXIF with exif library from {file_path}: {e}"
-            )
+            logger.debug(f"Could not extract EXIF with exif library from {file_path}: {e}")
 
             try:
                 image = Image.open(file_path)
@@ -141,9 +130,7 @@ class ExifExtractor:
                         if tag == "DateTimeOriginal":
                             exif_dict["datetime_original"] = self._parse_datetime(value)
                         elif tag == "DateTimeDigitized":
-                            exif_dict["datetime_digitized"] = self._parse_datetime(
-                                value
-                            )
+                            exif_dict["datetime_digitized"] = self._parse_datetime(value)
                         elif tag == "DateTime":
                             exif_dict["datetime"] = self._parse_datetime(value)
                         elif tag == "Make":
@@ -177,7 +164,7 @@ class ExifExtractor:
 
         return exif_dict
 
-    def _extract_gps_data(self, file_path: Path) -> Optional[Dict[str, Any]]:
+    def _extract_gps_data(self, file_path: Path) -> dict[str, Any] | None:
         gps_data = {}
 
         try:
@@ -188,19 +175,11 @@ class ExifExtractor:
                     if hasattr(img, "gps_latitude") and hasattr(img, "gps_longitude"):
                         lat = self._convert_gps_coordinates(
                             img.gps_latitude,
-                            (
-                                img.gps_latitude_ref
-                                if hasattr(img, "gps_latitude_ref")
-                                else "N"
-                            ),
+                            (img.gps_latitude_ref if hasattr(img, "gps_latitude_ref") else "N"),
                         )
                         lon = self._convert_gps_coordinates(
                             img.gps_longitude,
-                            (
-                                img.gps_longitude_ref
-                                if hasattr(img, "gps_longitude_ref")
-                                else "E"
-                            ),
+                            (img.gps_longitude_ref if hasattr(img, "gps_longitude_ref") else "E"),
                         )
 
                         if lat and lon:
@@ -217,9 +196,7 @@ class ExifExtractor:
                         gps_data["direction"] = img.gps_direction
 
         except Exception as e:
-            logger.debug(
-                f"Could not extract GPS with exif library from {file_path}: {e}"
-            )
+            logger.debug(f"Could not extract GPS with exif library from {file_path}: {e}")
 
             try:
                 image = Image.open(file_path)
@@ -264,7 +241,7 @@ class ExifExtractor:
 
         return gps_data if gps_data else None
 
-    def _extract_additional_metadata(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_additional_metadata(self, file_path: Path) -> dict[str, Any]:
         metadata = {}
 
         try:
@@ -287,7 +264,7 @@ class ExifExtractor:
 
         return metadata
 
-    def _parse_datetime(self, datetime_string: str) -> Optional[datetime]:
+    def _parse_datetime(self, datetime_string: str) -> datetime | None:
         if not datetime_string:
             return None
 
@@ -310,9 +287,9 @@ class ExifExtractor:
         logger.debug(f"Could not parse datetime: {datetime_string}")
         return None
 
-    def _convert_gps_coordinates(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
+    def _convert_gps_coordinates(self, coord_tuple: tuple, ref: str) -> float | None:
         try:
-            if isinstance(coord_tuple, (list, tuple)) and len(coord_tuple) >= 3:
+            if isinstance(coord_tuple, list | tuple) and len(coord_tuple) >= 3:
                 degrees = float(coord_tuple[0])
                 minutes = float(coord_tuple[1])
                 seconds = float(coord_tuple[2])
@@ -329,9 +306,7 @@ class ExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def _convert_gps_coordinates_pil(
-        self, coord_tuple: Tuple, ref: str
-    ) -> Optional[float]:
+    def _convert_gps_coordinates_pil(self, coord_tuple: tuple, ref: str) -> float | None:
         try:
             degrees = coord_tuple[0]
             minutes = coord_tuple[1]
@@ -354,7 +329,7 @@ class ExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
+    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
         date_sources = [
             "datetime_original",
             "datetime_digitized",

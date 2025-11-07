@@ -1,18 +1,17 @@
-import yaml
-from pathlib import Path
-from typing import Dict, Any, Optional
 import logging
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
 
 class ConfigManager:
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config_path = config_path
-        self.config: Dict[str, Any] = {}
-        self.default_config_path = (
-            Path(__file__).parent.parent.parent / "config" / "default_config.yaml"
-        )
+        self.config: dict[str, Any] = {}
+        self.default_config_path = Path(__file__).parent.parent.parent / "config" / "default_config.yaml"
         self.user_config_path = Path.home() / ".lenslogic" / "config.yaml"
         self.load_config()
 
@@ -28,9 +27,9 @@ class ConfigManager:
             if custom_config:
                 self.config = self._merge_configs(self.config, custom_config)
 
-    def _load_default_config(self) -> Dict[str, Any]:
+    def _load_default_config(self) -> dict[str, Any]:
         try:
-            with open(self.default_config_path, "r") as f:
+            with open(self.default_config_path) as f:
                 return yaml.safe_load(f) or {}
         except FileNotFoundError:
             logger.warning(f"Default config not found at {self.default_config_path}")
@@ -39,46 +38,40 @@ class ConfigManager:
             logger.error(f"Error parsing default config: {e}")
             return self._get_hardcoded_defaults()
 
-    def _load_user_config(self) -> Optional[Dict[str, Any]]:
+    def _load_user_config(self) -> dict[str, Any] | None:
         if not self.user_config_path.exists():
             return None
 
         try:
-            with open(self.user_config_path, "r") as f:
+            with open(self.user_config_path) as f:
                 return yaml.safe_load(f)
         except yaml.YAMLError as e:
             logger.error(f"Error parsing user config: {e}")
             return None
 
-    def _load_custom_config(self) -> Optional[Dict[str, Any]]:
+    def _load_custom_config(self) -> dict[str, Any] | None:
         if not self.config_path or not Path(self.config_path).exists():
             return None
 
         try:
-            with open(self.config_path, "r") as f:
+            with open(self.config_path) as f:
                 return yaml.safe_load(f)
         except yaml.YAMLError as e:
             logger.error(f"Error parsing custom config: {e}")
             return None
 
-    def _merge_configs(
-        self, base: Dict[str, Any], override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _merge_configs(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
         result = base.copy()
 
         for key, value in override.items():
-            if (
-                key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
-            ):
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                 result[key] = self._merge_configs(result[key], value)
             else:
                 result[key] = value
 
         return result
 
-    def _get_hardcoded_defaults(self) -> Dict[str, Any]:
+    def _get_hardcoded_defaults(self) -> dict[str, Any]:
         return {
             "general": {
                 "source_directory": ".",
@@ -201,7 +194,7 @@ class ConfigManager:
 
         logger.info(f"Configuration exported to {path}")
 
-    def update_from_args(self, args: Dict[str, Any]) -> None:
+    def update_from_args(self, args: dict[str, Any]) -> None:
         if args.get("source"):
             self.set("general.source_directory", args["source"])
         if args.get("destination"):

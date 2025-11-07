@@ -1,8 +1,10 @@
 import logging
+
 import questionary
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
 from utils.branding import print_logo
 
 logger = logging.getLogger(__name__)
@@ -19,9 +21,7 @@ class ConfigurationWizard:
         print_logo("compact")
 
         self.console.print("\n[bold cyan]🔧 LensLogic Configuration Wizard[/bold cyan]")
-        self.console.print(
-            "[dim]Let's set up LensLogic for your photo organization needs[/dim]\n"
-        )
+        self.console.print("[dim]Let's set up LensLogic for your photo organization needs[/dim]\n")
 
         try:
             # Welcome and overview
@@ -40,12 +40,8 @@ class ConfigurationWizard:
 
             if questionary.confirm("Save this configuration?", default=True).ask():
                 self.config_manager.save_user_config()
-                self.console.print(
-                    "\n[green]✅ Configuration saved successfully![/green]"
-                )
-                self.console.print(
-                    f"[dim]Configuration saved to: {self.config_manager.user_config_path}[/dim]"
-                )
+                self.console.print("\n[green]✅ Configuration saved successfully![/green]")
+                self.console.print(f"[dim]Configuration saved to: {self.config_manager.user_config_path}[/dim]")
                 return True
             else:
                 self.console.print("\n[yellow]Configuration not saved[/yellow]")
@@ -82,9 +78,7 @@ The wizard takes about 5-10 minutes to complete.
         )
         self.console.print(panel)
 
-        return questionary.confirm(
-            "Would you like to continue with the configuration wizard?", default=True
-        ).ask()
+        return questionary.confirm("Would you like to continue with the configuration wizard?", default=True).ask()
 
     def _configure_basic_settings(self):
         """Configure basic directory and file settings"""
@@ -102,9 +96,7 @@ The wizard takes about 5-10 minutes to complete.
             self.config_manager.set("general.source_directory", source)
 
         # Destination directory
-        current_dest = self.config_manager.get(
-            "general.destination_directory", "./organized"
-        )
+        current_dest = self.config_manager.get("general.destination_directory", "./organized")
         destination = questionary.path(
             "Where should organized photos be saved? (destination directory)",
             default=current_dest,
@@ -143,16 +135,12 @@ The wizard takes about 5-10 minutes to complete.
             "Custom pattern...",
         ]
 
-        self.console.print(
-            "\n[dim]Available variables: {year}, {month}, {day}, {month_name}, {camera}[/dim]"
-        )
+        self.console.print("\n[dim]Available variables: {year}, {month}, {day}, {month_name}, {camera}[/dim]")
 
         pattern = questionary.select(
             "How should folders be organized?",
             choices=patterns,
-            default=self.config_manager.get(
-                "organization.folder_structure", patterns[0]
-            ),
+            default=self.config_manager.get("organization.folder_structure", patterns[0]),
         ).ask()
 
         if pattern == "Custom pattern...":
@@ -199,9 +187,7 @@ The wizard takes about 5-10 minutes to complete.
             "Custom pattern...",
         ]
 
-        self.console.print(
-            "\n[dim]Available variables: {year}, {month}, {day}, {hour}, {minute}, {second}[/dim]"
-        )
+        self.console.print("\n[dim]Available variables: {year}, {month}, {day}, {hour}, {minute}, {second}[/dim]")
         self.console.print(
             "[dim]                    {date}, {time}, {camera}, {original_name}, {iso}, {f_number}[/dim]"
         )
@@ -257,13 +243,9 @@ The wizard takes about 5-10 minutes to complete.
 
             location_folders = questionary.confirm(
                 "Include location in folder structure?",
-                default=self.config_manager.get(
-                    "geolocation.add_location_to_folder", False
-                ),
+                default=self.config_manager.get("geolocation.add_location_to_folder", False),
             ).ask()
-            self.config_manager.set(
-                "geolocation.add_location_to_folder", location_folders
-            )
+            self.config_manager.set("geolocation.add_location_to_folder", location_folders)
 
         # Duplicate detection
         enable_duplicates = questionary.confirm(
@@ -290,15 +272,11 @@ The wizard takes about 5-10 minutes to complete.
             self.config_manager.set("duplicate_detection.action", dup_action)
 
         # Image processing
-        auto_rotate = questionary.confirm(
-            "Auto-rotate images based on EXIF orientation?", default=True
-        ).ask()
+        auto_rotate = questionary.confirm("Auto-rotate images based on EXIF orientation?", default=True).ask()
         self.config_manager.set("image_processing.auto_rotate", auto_rotate)
 
         # Session detection
-        session_detection = questionary.confirm(
-            "Enable shooting session detection?", default=True
-        ).ask()
+        session_detection = questionary.confirm("Enable shooting session detection?", default=True).ask()
         if session_detection:
             time_gap = questionary.text(
                 "Time gap between sessions (minutes):",
@@ -320,9 +298,7 @@ The wizard takes about 5-10 minutes to complete.
         """Configure backup and sync settings"""
         self.console.print("\n[bold cyan]💾 Backup & Sync[/bold cyan]")
 
-        enable_backup = questionary.confirm(
-            "Configure backup settings?", default=False
-        ).ask()
+        enable_backup = questionary.confirm("Configure backup settings?", default=False).ask()
 
         if enable_backup:
             # Backup verification
@@ -332,9 +308,7 @@ The wizard takes about 5-10 minutes to complete.
             self.config_manager.set("backup.enable_verification", verify_backups)
 
             # Incremental sync
-            incremental = questionary.confirm(
-                "Use incremental sync (only copy changed files)?", default=True
-            ).ask()
+            incremental = questionary.confirm("Use incremental sync (only copy changed files)?", default=True).ask()
             self.config_manager.set("backup.incremental_mode", incremental)
 
             # Backup destinations
@@ -401,9 +375,7 @@ The wizard takes about 5-10 minutes to complete.
             "Separate RAW/JPEG",
             str(self.config_manager.get("organization.separate_raw", True)),
         )
-        table.add_row(
-            "Naming Pattern", self.config_manager.get("naming.pattern", "Default")
-        )
+        table.add_row("Naming Pattern", self.config_manager.get("naming.pattern", "Default"))
 
         # Features
         table.add_row(
@@ -438,9 +410,7 @@ The wizard takes about 5-10 minutes to complete.
 
         try:
             # Just get the essential paths
-            source = questionary.path(
-                "Where are your photos?", default=".", only_directories=True
-            ).ask()
+            source = questionary.path("Where are your photos?", default=".", only_directories=True).ask()
 
             if not source:
                 return False
@@ -460,9 +430,7 @@ The wizard takes about 5-10 minutes to complete.
 
             # Use smart defaults
             self.config_manager.set("general.preserve_originals", True)
-            self.config_manager.set(
-                "organization.folder_structure", "{year}/{month:02d}/{day:02d}"
-            )
+            self.config_manager.set("organization.folder_structure", "{year}/{month:02d}/{day:02d}")
             self.config_manager.set("organization.separate_raw", True)
             self.config_manager.set(
                 "naming.pattern",
@@ -472,9 +440,7 @@ The wizard takes about 5-10 minutes to complete.
             self.config_manager.set("features.remove_duplicates", True)
 
             self.console.print("\n[green]✅ Quick setup complete![/green]")
-            self.console.print(
-                "[dim]You can always run the full configuration wizard later[/dim]"
-            )
+            self.console.print("[dim]You can always run the full configuration wizard later[/dim]")
 
             if questionary.confirm("Save configuration?", default=True).ask():
                 self.config_manager.save_user_config()
@@ -489,10 +455,7 @@ The wizard takes about 5-10 minutes to complete.
         """Reset configuration to defaults"""
         self.console.print("\n[bold red]⚠️ Reset Configuration[/bold red]")
 
-        if questionary.confirm(
-            "This will reset ALL settings to defaults. Are you sure?", default=False
-        ).ask():
-
+        if questionary.confirm("This will reset ALL settings to defaults. Are you sure?", default=False).ask():
             # Clear user config
             self.config_manager.config = self.config_manager._get_hardcoded_defaults()
 

@@ -2,8 +2,8 @@
 Tests for ConfigManager utility
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -45,9 +45,7 @@ class TestConfigManager:
         # Check for main sections
         expected_sections = ["general", "file_types", "organization", "naming"]
         for section in expected_sections:
-            assert (
-                section in config
-            ), f"Expected section '{section}' not found in config"
+            assert section in config, f"Expected section '{section}' not found in config"
 
     def test_general_config_defaults(self):
         """Test general configuration defaults"""

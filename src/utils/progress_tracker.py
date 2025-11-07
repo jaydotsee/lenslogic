@@ -1,18 +1,19 @@
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
+
 from rich.console import Console
+from rich.panel import Panel
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
     TimeRemainingColumn,
 )
 from rich.table import Table
-from rich.panel import Panel
 
 logger = logging.getLogger(__name__)
 
@@ -51,18 +52,14 @@ class ProgressTracker:
                 TimeRemainingColumn(),
                 console=self.console,
             )
-            self.task_id = self.progress.add_task(
-                f"[cyan]{operation} files...", total=total_files
-            )
+            self.task_id = self.progress.add_task(f"[cyan]{operation} files...", total=total_files)
             self.progress.start()
 
     def update_file(self, file_path: str, status: str = "processing"):
         self.current_file = file_path
 
         if self.verbose and self.progress:
-            self.progress.update(
-                self.task_id, description=f"[cyan]{status}: {Path(file_path).name}"
-            )
+            self.progress.update(self.task_id, description=f"[cyan]{status}: {Path(file_path).name}")
 
     def file_processed(
         self,
@@ -134,9 +131,7 @@ class ProgressTracker:
         success_rate = 0
         if self.stats["processed_files"] > 0:
             success_rate = (
-                (self.stats["processed_files"] - self.stats["failed_files"])
-                / self.stats["processed_files"]
-                * 100
+                (self.stats["processed_files"] - self.stats["failed_files"]) / self.stats["processed_files"] * 100
             )
 
         if success_rate >= 95:
@@ -149,9 +144,7 @@ class ProgressTracker:
             status_color = "red"
             status_emoji = "❌"
 
-        self.console.print(
-            f"\n[{status_color}]{status_emoji} Success Rate: {success_rate:.1f}%[/{status_color}]"
-        )
+        self.console.print(f"\n[{status_color}]{status_emoji} Success Rate: {success_rate:.1f}%[/{status_color}]")
 
     def print_error(self, message: str):
         self.console.print(f"[red]✗ Error:[/red] {message}")
@@ -169,9 +162,7 @@ class ProgressTracker:
     def print_dry_run(self, message: str):
         self.console.print(f"[cyan][DRY RUN][/cyan] {message}")
 
-    def display_file_preview(
-        self, original: str, new_name: str, destination: str, metadata: Dict[str, Any]
-    ):
+    def display_file_preview(self, original: str, new_name: str, destination: str, metadata: dict[str, Any]):
         panel_content = f"""
 [bold]Original:[/bold] {Path(original).name}
 [bold]New Name:[/bold] {new_name}
@@ -196,10 +187,8 @@ class ProgressTracker:
 
         self.console.print(panel)
 
-    def create_statistics_table(self, stats: Dict[str, Any]) -> Table:
-        table = Table(
-            title="Library Statistics", show_header=True, header_style="bold magenta"
-        )
+    def create_statistics_table(self, stats: dict[str, Any]) -> Table:
+        table = Table(title="Library Statistics", show_header=True, header_style="bold magenta")
 
         table.add_column("File Type", style="cyan")
         table.add_column("Count", justify="right", style="green")

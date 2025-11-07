@@ -2,8 +2,8 @@
 Basic smoke tests to ensure CI passes
 """
 
-import sys
 import os
+import sys
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -15,9 +15,9 @@ class TestBasicFunctionality:
     def test_imports_work(self):
         """Test that basic imports work"""
         try:
+            from utils.camera_slugger import CameraSlugger
             from utils.config_manager import ConfigManager
             from utils.progress_tracker import ProgressTracker
-            from utils.camera_slugger import CameraSlugger
 
             # Test that classes can be instantiated
             assert ConfigManager is not None

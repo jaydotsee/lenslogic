@@ -3,10 +3,11 @@ import re
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple, List
+from typing import Any
+
+import exif
 from PIL import Image
 from PIL.ExifTags import TAGS
-import exif
 
 # Suppress specific warnings from the old exif library
 warnings.filterwarnings(
@@ -43,9 +44,7 @@ class EnhancedExifExtractor:
         self.cache = {}
         self.exiftool_session = None
         self._initialize_exiftool()
-        self.exiftool_available = (
-            EXIFTOOL_AVAILABLE and self.exiftool_session is not None
-        )
+        self.exiftool_available = EXIFTOOL_AVAILABLE and self.exiftool_session is not None
 
         # Initialize video extractor
         if VIDEO_EXTRACTION_AVAILABLE:
@@ -111,7 +110,7 @@ class EnhancedExifExtractor:
             except Exception:
                 pass
 
-    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> dict[str, Any]:
         """Extract comprehensive metadata using appropriate extractor (photo/video)"""
         file_path_obj = Path(file_path)
 
@@ -129,15 +128,9 @@ class EnhancedExifExtractor:
             "file_size": file_path_obj.stat().st_size if file_path_obj.exists() else 0,
             "file_extension": file_path_obj.suffix.lower(),
             "file_modified": (
-                datetime.fromtimestamp(file_path_obj.stat().st_mtime)
-                if file_path_obj.exists()
-                else None
+                datetime.fromtimestamp(file_path_obj.stat().st_mtime) if file_path_obj.exists() else None
             ),
-            "file_created": (
-                datetime.fromtimestamp(file_path_obj.stat().st_ctime)
-                if file_path_obj.exists()
-                else None
-            ),
+            "file_created": (datetime.fromtimestamp(file_path_obj.stat().st_ctime) if file_path_obj.exists() else None),
         }
 
         if not file_path_obj.exists():
@@ -163,14 +156,12 @@ class EnhancedExifExtractor:
                     legacy_metadata = self._extract_with_legacy_methods(file_path_obj)
                     metadata.update(legacy_metadata)
                 except Exception as e2:
-                    logger.warning(
-                        f"Fallback extraction also failed for {file_path_obj}: {e2}"
-                    )
+                    logger.warning(f"Fallback extraction also failed for {file_path_obj}: {e2}")
 
         self.cache[str(file_path_obj)] = metadata
         return metadata
 
-    def _extract_with_exiftool(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_with_exiftool(self, file_path: Path) -> dict[str, Any]:
         """Extract metadata using PyExifTool"""
         try:
             # Get all metadata from ExifTool
@@ -205,12 +196,8 @@ class EnhancedExifExtractor:
                         break
 
             # Camera information with enhanced detection
-            camera_make = exif_data.get(
-                "EXIF:Make", exif_data.get("MakerNotes:Make", "")
-            )
-            camera_model = exif_data.get(
-                "EXIF:Model", exif_data.get("MakerNotes:Model", "")
-            )
+            camera_make = exif_data.get("EXIF:Make", exif_data.get("MakerNotes:Make", ""))
+            camera_model = exif_data.get("EXIF:Model", exif_data.get("MakerNotes:Model", ""))
 
             if camera_make:
                 metadata["camera_make"] = str(camera_make).strip()
@@ -251,13 +238,11 @@ class EnhancedExifExtractor:
                 for field in fields:
                     if field in exif_data:
                         value = exif_data[field]
-                        if isinstance(value, (int, float)) or (
+                        if isinstance(value, int | float) or (
                             isinstance(value, str) and value.replace(".", "").isdigit()
                         ):
                             try:
-                                metadata[key] = (
-                                    float(value) if "." in str(value) else int(value)
-                                )
+                                metadata[key] = float(value) if "." in str(value) else int(value)
                             except (ValueError, TypeError):
                                 metadata[key] = value
                         break
@@ -290,16 +275,14 @@ class EnhancedExifExtractor:
             if "EXIF:Quality" in exif_data:
                 metadata["quality"] = str(exif_data["EXIF:Quality"])
 
-            logger.debug(
-                f"Extracted {len(metadata)} metadata fields with ExifTool from {file_path}"
-            )
+            logger.debug(f"Extracted {len(metadata)} metadata fields with ExifTool from {file_path}")
             return metadata
 
         except Exception as e:
             logger.error(f"ExifTool extraction failed for {file_path}: {e}")
             return {}
 
-    def _extract_gps_with_exiftool(self, exif_data: Dict) -> Optional[Dict[str, Any]]:
+    def _extract_gps_with_exiftool(self, exif_data: dict) -> dict[str, Any] | None:
         """Extract GPS data using ExifTool"""
         gps_data = {}
 
@@ -359,7 +342,7 @@ class EnhancedExifExtractor:
 
         return gps_data if gps_data else None
 
-    def _extract_professional_metadata(self, exif_data: Dict) -> Dict[str, Any]:
+    def _extract_professional_metadata(self, exif_data: dict) -> dict[str, Any]:
         """Extract professional/advanced metadata fields"""
         metadata = {}
 
@@ -424,11 +407,7 @@ class EnhancedExifExtractor:
         # Flash information
         if "EXIF:Flash" in exif_data:
             flash_value = exif_data["EXIF:Flash"]
-            metadata["flash_fired"] = (
-                bool(int(flash_value) & 1)
-                if isinstance(flash_value, (int, str))
-                else False
-            )
+            metadata["flash_fired"] = bool(int(flash_value) & 1) if isinstance(flash_value, int | str) else False
 
         flash_fields = {
             "flash_mode": ["MakerNotes:FlashMode"],
@@ -454,7 +433,7 @@ class EnhancedExifExtractor:
 
         return metadata
 
-    def _parse_exiftool_datetime(self, datetime_string: str) -> Optional[datetime]:
+    def _parse_exiftool_datetime(self, datetime_string: str) -> datetime | None:
         """Parse datetime from ExifTool output"""
         if not datetime_string:
             return None
@@ -540,11 +519,10 @@ class EnhancedExifExtractor:
             ".rwl",
             ".sr2",
             ".srf",
-            ".x3f",
         }
         return file_path.suffix.lower() in supported_extensions
 
-    def _extract_with_legacy_methods(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_with_legacy_methods(self, file_path: Path) -> dict[str, Any]:
         """Fallback to legacy EXIF extraction methods"""
         logger.debug(f"Using legacy EXIF extraction for {file_path}")
 
@@ -557,17 +535,11 @@ class EnhancedExifExtractor:
 
                 if img.has_exif:
                     if hasattr(img, "datetime_original"):
-                        metadata["datetime_original"] = self._parse_exiftool_datetime(
-                            img.datetime_original
-                        )
+                        metadata["datetime_original"] = self._parse_exiftool_datetime(img.datetime_original)
                     if hasattr(img, "datetime_digitized"):
-                        metadata["datetime_digitized"] = self._parse_exiftool_datetime(
-                            img.datetime_digitized
-                        )
+                        metadata["datetime_digitized"] = self._parse_exiftool_datetime(img.datetime_digitized)
                     if hasattr(img, "datetime"):
-                        metadata["datetime"] = self._parse_exiftool_datetime(
-                            img.datetime
-                        )
+                        metadata["datetime"] = self._parse_exiftool_datetime(img.datetime)
 
                     # Camera info
                     if hasattr(img, "make"):
@@ -601,19 +573,11 @@ class EnhancedExifExtractor:
                     if hasattr(img, "gps_latitude") and hasattr(img, "gps_longitude"):
                         lat = self._convert_gps_coordinates(
                             img.gps_latitude,
-                            (
-                                img.gps_latitude_ref
-                                if hasattr(img, "gps_latitude_ref")
-                                else "N"
-                            ),
+                            (img.gps_latitude_ref if hasattr(img, "gps_latitude_ref") else "N"),
                         )
                         lon = self._convert_gps_coordinates(
                             img.gps_longitude,
-                            (
-                                img.gps_longitude_ref
-                                if hasattr(img, "gps_longitude_ref")
-                                else "E"
-                            ),
+                            (img.gps_longitude_ref if hasattr(img, "gps_longitude_ref") else "E"),
                         )
 
                         if lat and lon:
@@ -639,9 +603,7 @@ class EnhancedExifExtractor:
 
             # Try to get EXIF with PIL
             exif_data = image._getexif()
-            if exif_data and not metadata.get(
-                "camera_model"
-            ):  # Only if we don't have it already
+            if exif_data and not metadata.get("camera_model"):  # Only if we don't have it already
                 for tag_id, value in exif_data.items():
                     tag = TAGS.get(tag_id, tag_id)
 
@@ -659,10 +621,10 @@ class EnhancedExifExtractor:
 
         return metadata
 
-    def _convert_gps_coordinates(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
+    def _convert_gps_coordinates(self, coord_tuple: tuple, ref: str) -> float | None:
         """Convert GPS coordinates to decimal degrees"""
         try:
-            if isinstance(coord_tuple, (list, tuple)) and len(coord_tuple) >= 3:
+            if isinstance(coord_tuple, list | tuple) and len(coord_tuple) >= 3:
                 degrees = float(coord_tuple[0])
                 minutes = float(coord_tuple[1])
                 seconds = float(coord_tuple[2])
@@ -679,7 +641,7 @@ class EnhancedExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
+    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
         """Get the best available capture datetime"""
         date_sources = [
             "datetime_original",
@@ -699,7 +661,7 @@ class EnhancedExifExtractor:
         """Clear the metadata cache"""
         self.cache.clear()
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """Get list of supported file formats"""
         if EXIFTOOL_AVAILABLE:
             return [
@@ -785,7 +747,7 @@ class EnhancedExifExtractor:
         else:
             return "Legacy (Basic)"
 
-    def get_exiftool_version(self) -> Optional[str]:
+    def get_exiftool_version(self) -> str | None:
         """Get ExifTool version if available"""
         if EXIFTOOL_AVAILABLE and self.exiftool_session:
             try:
@@ -795,7 +757,7 @@ class EnhancedExifExtractor:
                 return "Unknown"
         return None
 
-    def _extract_video_metadata(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_video_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract metadata from video files using enhanced video extractor"""
         if self.video_extractor:
             try:
@@ -825,16 +787,8 @@ class EnhancedExifExtractor:
             "file_name": file_path.name,
             "file_size": file_path.stat().st_size if file_path.exists() else 0,
             "file_extension": file_path.suffix.lower(),
-            "file_modified": (
-                datetime.fromtimestamp(file_path.stat().st_mtime)
-                if file_path.exists()
-                else None
-            ),
-            "file_created": (
-                datetime.fromtimestamp(file_path.stat().st_ctime)
-                if file_path.exists()
-                else None
-            ),
+            "file_modified": (datetime.fromtimestamp(file_path.stat().st_mtime) if file_path.exists() else None),
+            "file_created": (datetime.fromtimestamp(file_path.stat().st_ctime) if file_path.exists() else None),
             "media_type": "video",
             "format": file_path.suffix[1:].upper() if file_path.suffix else "Unknown",
         }

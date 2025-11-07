@@ -1,13 +1,14 @@
 import logging
-import questionary
 from pathlib import Path
-from typing import Optional
+
+import questionary
+from rich.align import Align
+from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.columns import Columns
 from rich.text import Text
-from rich.align import Align
+
 from utils.branding import LENSLOGIC_LOGO, get_version_info
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class InteractiveMenu:
         self.progress_tracker = progress_tracker
         self.console = Console()
 
-    def main_menu(self) -> Optional[str]:
+    def main_menu(self) -> str | None:
         self.console.clear()
         self._print_header()
 
@@ -154,9 +155,7 @@ class InteractiveMenu:
         )
 
         # Display columns
-        columns = Columns(
-            [quick_actions, configuration, analysis], equal=True, expand=True
-        )
+        columns = Columns([quick_actions, configuration, analysis], equal=True, expand=True)
         self.console.print(columns)
         self.console.print()
 
@@ -168,15 +167,11 @@ class InteractiveMenu:
         # Key settings to display
         source_dir = config.get("general", {}).get("source_directory", "Not set")
         dest_dir = config.get("general", {}).get("destination_directory", "Not set")
-        folder_structure = config.get("organization", {}).get(
-            "folder_structure", "Default"
-        )
+        folder_structure = config.get("organization", {}).get("folder_structure", "Default")
         naming_pattern = config.get("naming", {}).get("pattern", "Default")
         separate_raw = config.get("organization", {}).get("separate_raw", True)
         geo_enabled = config.get("geolocation", {}).get("enabled", True)
-        location_components = config.get("geolocation", {}).get(
-            "location_components", "city"
-        )
+        location_components = config.get("geolocation", {}).get("location_components", "city")
         duplicate_detection = config.get("features", {}).get("remove_duplicates", True)
         create_sidecar = config.get("features", {}).get("create_sidecar", True)
 
@@ -190,9 +185,7 @@ class InteractiveMenu:
                 return "🔴"
 
         # Create enhanced table
-        table = Table(
-            show_header=True, header_style="bold bright_cyan", border_style="cyan"
-        )
+        table = Table(show_header=True, header_style="bold bright_cyan", border_style="cyan")
         table.add_column("Status", width=6)
         table.add_column("Setting", style="bold white", width=18)
         table.add_column("Current Value", style="bright_white", width=45)
@@ -201,20 +194,12 @@ class InteractiveMenu:
         table.add_row(
             get_status_indicator(source_dir != "Not set", source_dir),
             "Source Directory",
-            (
-                f"[dim]{source_dir}[/dim]"
-                if source_dir == "Not set"
-                else f"[green]{source_dir}[/green]"
-            ),
+            (f"[dim]{source_dir}[/dim]" if source_dir == "Not set" else f"[green]{source_dir}[/green]"),
         )
         table.add_row(
             get_status_indicator(dest_dir != "Not set", dest_dir),
             "Destination Directory",
-            (
-                f"[dim]{dest_dir}[/dim]"
-                if dest_dir == "Not set"
-                else f"[green]{dest_dir}[/green]"
-            ),
+            (f"[dim]{dest_dir}[/dim]" if dest_dir == "Not set" else f"[green]{dest_dir}[/green]"),
         )
         table.add_row(
             get_status_indicator(True, folder_structure),
@@ -234,11 +219,7 @@ class InteractiveMenu:
         table.add_row(
             "🟢" if geo_enabled else "🔴",
             "Geolocation",
-            (
-                f"✅ Enabled ({location_components.replace('_', ' + ').title()})"
-                if geo_enabled
-                else "❌ Disabled"
-            ),
+            (f"✅ Enabled ({location_components.replace('_', ' + ').title()})" if geo_enabled else "❌ Disabled"),
         )
         table.add_row(
             "🟢" if duplicate_detection else "🟡",
@@ -267,9 +248,7 @@ class InteractiveMenu:
         )
 
         completeness = configured_settings / total_settings * 100
-        completeness_bar = "█" * int(completeness // 10) + "░" * (
-            10 - int(completeness // 10)
-        )
+        completeness_bar = "█" * int(completeness // 10) + "░" * (10 - int(completeness // 10))
 
         status_text = f"[bold]Configuration Status:[/bold] {completeness:.0f}% [{completeness_bar}]\n"
         if completeness < 70:
@@ -354,9 +333,7 @@ class InteractiveMenu:
 
         destination = questionary.path(
             "Destination directory:",
-            default=self.config_manager.get(
-                "general.destination_directory", "./organized"
-            ),
+            default=self.config_manager.get("general.destination_directory", "./organized"),
             only_directories=True,
         ).ask()
 
@@ -372,18 +349,12 @@ class InteractiveMenu:
 
         self.console.print("[green]✓[/green] Directory settings updated")
 
-    def get_custom_destination(self) -> Optional[str]:
+    def get_custom_destination(self) -> str | None:
         """Get a custom destination directory from the user for one-time use"""
-        self.console.print(
-            "\n[bold cyan]Custom Destination for This Session[/bold cyan]"
-        )
-        self.console.print(
-            "[dim]This will not change your saved configuration.[/dim]\n"
-        )
+        self.console.print("\n[bold cyan]Custom Destination for This Session[/bold cyan]")
+        self.console.print("[dim]This will not change your saved configuration.[/dim]\n")
 
-        current_dest = self.config_manager.get(
-            "general.destination_directory", "./organized"
-        )
+        current_dest = self.config_manager.get("general.destination_directory", "./organized")
         self.console.print(f"[dim]Current configured destination: {current_dest}[/dim]")
 
         custom_dest = questionary.path(
@@ -409,21 +380,15 @@ class InteractiveMenu:
         ]
 
         self.console.print("[dim]Available variables:[/dim]")
-        self.console.print(
-            "[dim]  {year}, {month}, {day}, {hour}, {minute}, {second}[/dim]"
-        )
+        self.console.print("[dim]  {year}, {month}, {day}, {hour}, {minute}, {second}[/dim]")
         self.console.print("[dim]  {date}, {time}, {timestamp}[/dim]")
         self.console.print("[dim]  {camera}, {camera_make}, {camera_model}[/dim]")
-        self.console.print(
-            "[dim]  {original_name}, {original_sequence}, {iso}, {f_number}, {focal_length}[/dim]"
-        )
+        self.console.print("[dim]  {original_name}, {original_sequence}, {iso}, {f_number}, {focal_length}[/dim]")
         self.console.print(
             "[dim]  Note: {original_sequence} extracts numbers from original filename (e.g., ZF0_8151.JPG -> 8151)[/dim]\n"
         )
 
-        pattern_choice = questionary.select(
-            "Select naming pattern:", choices=patterns
-        ).ask()
+        pattern_choice = questionary.select("Select naming pattern:", choices=patterns).ask()
 
         if pattern_choice == "Custom pattern...":
             pattern = questionary.text(
@@ -458,14 +423,10 @@ class InteractiveMenu:
         ]
 
         self.console.print("[dim]Available variables:[/dim]")
-        self.console.print(
-            "[dim]  {year}, {month}, {day}, {month_name}, {month_short}[/dim]"
-        )
+        self.console.print("[dim]  {year}, {month}, {day}, {month_name}, {month_short}[/dim]")
         self.console.print("[dim]  {camera}, {weekday}, {week}[/dim]\n")
 
-        structure_choice = questionary.select(
-            "Select folder structure:", choices=structures
-        ).ask()
+        structure_choice = questionary.select("Select folder structure:", choices=structures).ask()
 
         if structure_choice == "Custom structure...":
             structure = questionary.text(
@@ -494,15 +455,9 @@ class InteractiveMenu:
         current_raw = self.config_manager.get("file_types.raw", [])
         current_videos = self.config_manager.get("file_types.videos", [])
 
-        self.console.print(
-            f"[cyan]Current image extensions:[/cyan] {', '.join(current_images)}"
-        )
-        self.console.print(
-            f"[cyan]Current RAW extensions:[/cyan] {', '.join(current_raw)}"
-        )
-        self.console.print(
-            f"[cyan]Current video extensions:[/cyan] {', '.join(current_videos)}\n"
-        )
+        self.console.print(f"[cyan]Current image extensions:[/cyan] {', '.join(current_images)}")
+        self.console.print(f"[cyan]Current RAW extensions:[/cyan] {', '.join(current_raw)}")
+        self.console.print(f"[cyan]Current video extensions:[/cyan] {', '.join(current_videos)}\n")
 
         if questionary.confirm("Modify image extensions?").ask():
             new_images = questionary.text(
@@ -510,9 +465,7 @@ class InteractiveMenu:
                 default=", ".join(current_images),
             ).ask()
             if new_images:
-                self.config_manager.set(
-                    "file_types.images", [ext.strip() for ext in new_images.split(",")]
-                )
+                self.config_manager.set("file_types.images", [ext.strip() for ext in new_images.split(",")])
 
         if questionary.confirm("Modify RAW extensions?").ask():
             new_raw = questionary.text(
@@ -520,9 +473,7 @@ class InteractiveMenu:
                 default=", ".join(current_raw),
             ).ask()
             if new_raw:
-                self.config_manager.set(
-                    "file_types.raw", [ext.strip() for ext in new_raw.split(",")]
-                )
+                self.config_manager.set("file_types.raw", [ext.strip() for ext in new_raw.split(",")])
 
         if questionary.confirm("Modify video extensions?").ask():
             new_videos = questionary.text(
@@ -530,9 +481,7 @@ class InteractiveMenu:
                 default=", ".join(current_videos),
             ).ask()
             if new_videos:
-                self.config_manager.set(
-                    "file_types.videos", [ext.strip() for ext in new_videos.split(",")]
-                )
+                self.config_manager.set("file_types.videos", [ext.strip() for ext in new_videos.split(",")])
 
         self.console.print("[green]✓[/green] File type settings updated")
 
@@ -556,9 +505,7 @@ class InteractiveMenu:
 
             add_to_folder = questionary.confirm(
                 "Add location to folder structure?",
-                default=self.config_manager.get(
-                    "geolocation.add_location_to_folder", False
-                ),
+                default=self.config_manager.get("geolocation.add_location_to_folder", False),
             ).ask()
 
             self.config_manager.set("geolocation.add_location_to_folder", add_to_folder)
@@ -566,15 +513,11 @@ class InteractiveMenu:
             if add_to_folder:
                 pattern = questionary.text(
                     "Location folder pattern:",
-                    default=self.config_manager.get(
-                        "geolocation.location_folder_pattern", "{country}/{city}"
-                    ),
+                    default=self.config_manager.get("geolocation.location_folder_pattern", "{country}/{city}"),
                 ).ask()
 
                 if pattern:
-                    self.config_manager.set(
-                        "geolocation.location_folder_pattern", pattern
-                    )
+                    self.config_manager.set("geolocation.location_folder_pattern", pattern)
 
         self.console.print("[green]✓[/green] Geolocation settings updated")
 
@@ -593,16 +536,12 @@ class InteractiveMenu:
         if method in ["pixel", "histogram"]:
             threshold = questionary.text(
                 "Similarity threshold (0.0-1.0):",
-                default=str(
-                    self.config_manager.get("duplicate_detection.threshold", 0.95)
-                ),
+                default=str(self.config_manager.get("duplicate_detection.threshold", 0.95)),
                 validate=lambda x: x.replace(".", "").isdigit() and 0 <= float(x) <= 1,
             ).ask()
 
             if threshold:
-                self.config_manager.set(
-                    "duplicate_detection.threshold", float(threshold)
-                )
+                self.config_manager.set("duplicate_detection.threshold", float(threshold))
 
         actions = ["skip", "rename", "move"]
         action = questionary.select(
@@ -616,9 +555,7 @@ class InteractiveMenu:
         if action == "move":
             folder = questionary.text(
                 "Duplicate folder name:",
-                default=self.config_manager.get(
-                    "duplicate_detection.duplicate_folder", "DUPLICATES"
-                ),
+                default=self.config_manager.get("duplicate_detection.duplicate_folder", "DUPLICATES"),
             ).ask()
 
             if folder:
@@ -638,9 +575,7 @@ class InteractiveMenu:
         self.config_manager.set("features.create_sidecar", create_sidecar)
 
         if create_sidecar:
-            self.console.print(
-                "[dim]XMP sidecar files will be created alongside organized photos[/dim]"
-            )
+            self.console.print("[dim]XMP sidecar files will be created alongside organized photos[/dim]")
             self.console.print(
                 "[dim]These files contain metadata and are compatible with professional photo software[/dim]"
             )
@@ -707,9 +642,7 @@ class InteractiveMenu:
         elif "Test pattern" in choice:
             self._test_pattern()
         elif "Reset to defaults" in choice:
-            if questionary.confirm(
-                "Are you sure you want to reset all settings?"
-            ).ask():
+            if questionary.confirm("Are you sure you want to reset all settings?").ask():
                 self.config_manager.load_config()
                 self.console.print("[yellow]Settings reset to defaults[/yellow]")
         elif "Back" in choice:
@@ -718,9 +651,7 @@ class InteractiveMenu:
         return True
 
     def _export_config(self):
-        path = questionary.path(
-            "Export configuration to:", default="./photo_organizer_config.yaml"
-        ).ask()
+        path = questionary.path("Export configuration to:", default="./photo_organizer_config.yaml").ask()
 
         if path:
             try:
@@ -730,17 +661,13 @@ class InteractiveMenu:
                 self.console.print(f"[red]✗[/red] Export failed: {e}")
 
     def _import_config(self):
-        path = questionary.path(
-            "Import configuration from:", only_directories=False
-        ).ask()
+        path = questionary.path("Import configuration from:", only_directories=False).ask()
 
         if path and Path(path).exists():
             try:
                 self.config_manager.config_path = path
                 self.config_manager.load_config()
-                self.console.print(
-                    f"[green]✓[/green] Configuration imported from {path}"
-                )
+                self.console.print(f"[green]✓[/green] Configuration imported from {path}")
             except Exception as e:
                 self.console.print(f"[red]✗[/red] Import failed: {e}")
 
@@ -833,9 +760,7 @@ class InteractiveMenu:
         # Geolocation settings
         table.add_row("[bold yellow]GEOLOCATION[/bold yellow]", "", "")
         table.add_row("enabled", "Extract and process GPS coordinates", "true")
-        table.add_row(
-            "reverse_geocode", "Convert GPS to location names (city/country)", "true"
-        )
+        table.add_row("reverse_geocode", "Convert GPS to location names (city/country)", "true")
         table.add_row(
             "add_location_to_folder",
             "Include location in folder structure",
@@ -850,19 +775,13 @@ class InteractiveMenu:
         # Features
         table.add_row("[bold yellow]FEATURES[/bold yellow]", "", "")
         table.add_row("remove_duplicates", "Detect and handle duplicate files", "true")
-        table.add_row(
-            "create_sidecar", "Generate XMP metadata files", "true (creates .xmp files)"
-        )
+        table.add_row("create_sidecar", "Generate XMP metadata files", "true (creates .xmp files)")
         table.add_row("auto_rotate", "Automatically rotate images using EXIF", "true")
 
         # Backup settings
         table.add_row("[bold yellow]BACKUP[/bold yellow]", "", "")
-        table.add_row(
-            "destinations", "List of backup locations", "['/backup1', '/backup2']"
-        )
-        table.add_row(
-            "enable_verification", "Verify backup integrity with checksums", "true"
-        )
+        table.add_row("destinations", "List of backup locations", "['/backup1', '/backup2']")
+        table.add_row("enable_verification", "Verify backup integrity with checksums", "true")
         table.add_row("incremental_mode", "Only backup changed files", "true")
 
         self.console.print(table)
@@ -874,15 +793,9 @@ class InteractiveMenu:
         self.console.print(
             "• {original_sequence} preserves sequence from original filename (e.g., ZF0_8151.JPG → 8151)"
         )
-        self.console.print(
-            "• Location folders: Set location_components to 'city' for clean organization"
-        )
-        self.console.print(
-            "• XMP sidecars: Enable for professional photo/video workflow compatibility"
-        )
-        self.console.print(
-            "• Backup verification: Ensures your backups are not corrupted"
-        )
+        self.console.print("• Location folders: Set location_components to 'city' for clean organization")
+        self.console.print("• XMP sidecars: Enable for professional photo/video workflow compatibility")
+        self.console.print("• Backup verification: Ensures your backups are not corrupted")
         self.console.print("• Duplicate detection: 'hash' method is most reliable")
 
         self.console.print("\n[dim]Press Enter to return to main menu...[/dim]")
@@ -941,9 +854,7 @@ class InteractiveMenu:
         """Configure backup destinations"""
         self.console.print("[bold cyan]📋 Configure Backup Destinations[/bold cyan]\n")
 
-        current_destinations = self.config_manager.config.get("backup", {}).get(
-            "destinations", []
-        )
+        current_destinations = self.config_manager.config.get("backup", {}).get("destinations", [])
 
         if current_destinations:
             self.console.print("Current backup destinations:")
@@ -962,9 +873,7 @@ class InteractiveMenu:
         choice = questionary.select("What would you like to do?", choices=choices).ask()
 
         if choice and "Add New Destination" in choice:
-            destination = questionary.path(
-                "Enter backup destination path:", only_directories=True
-            ).ask()
+            destination = questionary.path("Enter backup destination path:", only_directories=True).ask()
 
             if destination:
                 if "backup" not in self.config_manager.config:
@@ -973,9 +882,7 @@ class InteractiveMenu:
                     self.config_manager.config["backup"]["destinations"] = []
 
                 self.config_manager.config["backup"]["destinations"].append(destination)
-                self.console.print(
-                    f"[green]✓[/green] Added backup destination: {destination}"
-                )
+                self.console.print(f"[green]✓[/green] Added backup destination: {destination}")
 
         elif choice and "Remove Destination" in choice:
             if current_destinations:
@@ -985,17 +892,11 @@ class InteractiveMenu:
                 ).ask()
 
                 if dest_choice and dest_choice != "Cancel":
-                    self.config_manager.config["backup"]["destinations"].remove(
-                        dest_choice
-                    )
-                    self.console.print(
-                        f"[green]✓[/green] Removed backup destination: {dest_choice}"
-                    )
+                    self.config_manager.config["backup"]["destinations"].remove(dest_choice)
+                    self.console.print(f"[green]✓[/green] Removed backup destination: {dest_choice}")
 
         elif choice and "Clear All Destinations" in choice:
-            if questionary.confirm(
-                "Are you sure you want to clear all backup destinations?"
-            ).ask():
+            if questionary.confirm("Are you sure you want to clear all backup destinations?").ask():
                 self.config_manager.config["backup"]["destinations"] = []
                 self.console.print("[green]✓[/green] All backup destinations cleared")
 
@@ -1005,9 +906,7 @@ class InteractiveMenu:
         """Start the backup process"""
         self.console.print("[bold cyan]🚀 Starting Backup Process[/bold cyan]\n")
 
-        destinations = self.config_manager.config.get("backup", {}).get(
-            "destinations", []
-        )
+        destinations = self.config_manager.config.get("backup", {}).get("destinations", [])
         if not destinations:
             self.console.print("[red]❌ No backup destinations configured![/red]")
             self.console.print("Please configure backup destinations first.")
@@ -1015,9 +914,7 @@ class InteractiveMenu:
             return
 
         # Backup the organized photos (destination directory), not the source directory
-        source = self.config_manager.config.get("general", {}).get(
-            "destination_directory", "./organized"
-        )
+        source = self.config_manager.config.get("general", {}).get("destination_directory", "./organized")
         self.console.print(f"Source (organized photos): {source}")
         self.console.print(f"Destinations: {len(destinations)}")
 
@@ -1043,12 +940,8 @@ class InteractiveMenu:
             from pathlib import Path
 
             if not Path(source_dir).exists():
-                self.console.print(
-                    f"[red]❌ Source directory does not exist: {source_dir}[/red]"
-                )
-                self.console.print(
-                    "Please organize your photos first before backing up."
-                )
+                self.console.print(f"[red]❌ Source directory does not exist: {source_dir}[/red]")
+                self.console.print("Please organize your photos first before backing up.")
                 return
 
             # Check destination accessibility
@@ -1062,28 +955,18 @@ class InteractiveMenu:
                     test_file = dest_path / ".lenslogic_test_write"
                     test_file.write_text("test")
                     test_file.unlink()
-                    self.console.print(
-                        f"  ✓ Destination {i}: {dest} - [green]Accessible[/green]"
-                    )
+                    self.console.print(f"  ✓ Destination {i}: {dest} - [green]Accessible[/green]")
                 except Exception as e:
-                    self.console.print(
-                        f"  ❌ Destination {i}: {dest} - [red]Error: {e}[/red]"
-                    )
+                    self.console.print(f"  ❌ Destination {i}: {dest} - [red]Error: {e}[/red]")
 
             self.console.print()
 
             # Perform incremental sync
-            dry_run = self.config_manager.config.get("general", {}).get(
-                "dry_run", False
-            )
+            dry_run = self.config_manager.config.get("general", {}).get("dry_run", False)
             if dry_run:
-                self.console.print(
-                    "[yellow]🔍 Running in dry-run mode - no files will be modified[/yellow]"
-                )
+                self.console.print("[yellow]🔍 Running in dry-run mode - no files will be modified[/yellow]")
 
-            result = backup_manager.incremental_sync(
-                source_dir, destinations, dry_run=dry_run
-            )
+            result = backup_manager.incremental_sync(source_dir, destinations, dry_run=dry_run)
 
             # Display results
             self.console.print("\n[bold green]✅ Backup completed![/bold green]")
@@ -1094,9 +977,7 @@ class InteractiveMenu:
             self.console.print(f"  • Sync time: {result['sync_time']:.2f} seconds")
 
             if result["total_errors"] > 0:
-                self.console.print(
-                    f"  • [yellow]Errors: {result['total_errors']}[/yellow]"
-                )
+                self.console.print(f"  • [yellow]Errors: {result['total_errors']}[/yellow]")
 
             # Show per-destination results
             self.console.print("\n[bold]Per-destination results:[/bold]")
@@ -1107,16 +988,12 @@ class InteractiveMenu:
                 self.console.print(f"    • Deleted: {dest_result['files_deleted']}")
                 self.console.print(f"    • Skipped: {dest_result['files_skipped']}")
                 if dest_result["errors"]:
-                    self.console.print(
-                        f"    • [yellow]Errors: {len(dest_result['errors'])}[/yellow]"
-                    )
+                    self.console.print(f"    • [yellow]Errors: {len(dest_result['errors'])}[/yellow]")
                     # Show first few errors for debugging
                     for error in dest_result["errors"][:3]:
                         self.console.print(f"      - [red]{error}[/red]")
                     if len(dest_result["errors"]) > 3:
-                        self.console.print(
-                            f"      - [dim]... and {len(dest_result['errors']) - 3} more errors[/dim]"
-                        )
+                        self.console.print(f"      - [dim]... and {len(dest_result['errors']) - 3} more errors[/dim]")
 
             # Check if any destinations are missing from results
             expected_destinations = set(destinations)
@@ -1124,35 +1001,23 @@ class InteractiveMenu:
             missing_destinations = expected_destinations - actual_destinations
 
             if missing_destinations:
-                self.console.print(
-                    "\n[red]⚠️ Some destinations were not processed:[/red]"
-                )
+                self.console.print("\n[red]⚠️ Some destinations were not processed:[/red]")
                 for missing_dest in missing_destinations:
-                    self.console.print(
-                        f"  📁 [red]{missing_dest}[/red] - Not processed"
-                    )
+                    self.console.print(f"  📁 [red]{missing_dest}[/red] - Not processed")
 
             # Show any top-level errors
             if "error" in result:
-                self.console.print(
-                    f"\n[red]❌ Top-level error: {result['error']}[/red]"
-                )
+                self.console.print(f"\n[red]❌ Top-level error: {result['error']}[/red]")
 
             # Offer verification
-            if self.config_manager.config.get("backup", {}).get(
-                "enable_verification", True
-            ):
+            if self.config_manager.config.get("backup", {}).get("enable_verification", True):
                 if questionary.confirm("\nVerify backup integrity?").ask():
-                    self._verify_backup_integrity(
-                        backup_manager, source_dir, destinations
-                    )
+                    self._verify_backup_integrity(backup_manager, source_dir, destinations)
 
         except Exception as e:
             self.console.print(f"[red]❌ Backup failed: {e}[/red]")
 
-    def _verify_backup_integrity(
-        self, backup_manager, source_dir: str, destinations: list
-    ):
+    def _verify_backup_integrity(self, backup_manager, source_dir: str, destinations: list):
         """Verify backup integrity"""
         self.console.print("\n[bold cyan]🔍 Verifying backup integrity...[/bold cyan]")
 
@@ -1160,41 +1025,25 @@ class InteractiveMenu:
             self.console.print(f"\nVerifying: {dest}")
 
             try:
-                verification = backup_manager.verify_backup(
-                    source_dir, dest, quick_mode=True
-                )
+                verification = backup_manager.verify_backup(source_dir, dest, quick_mode=True)
 
                 if verification["integrity_score"] >= 95:
-                    self.console.print(
-                        f"[green]✓ {verification['integrity_score']:.1f}% integrity - Excellent[/green]"
-                    )
+                    self.console.print(f"[green]✓ {verification['integrity_score']:.1f}% integrity - Excellent[/green]")
                 elif verification["integrity_score"] >= 90:
-                    self.console.print(
-                        f"[yellow]⚠ {verification['integrity_score']:.1f}% integrity - Good[/yellow]"
-                    )
+                    self.console.print(f"[yellow]⚠ {verification['integrity_score']:.1f}% integrity - Good[/yellow]")
                 else:
-                    self.console.print(
-                        f"[red]❌ {verification['integrity_score']:.1f}% integrity - Issues found[/red]"
-                    )
+                    self.console.print(f"[red]❌ {verification['integrity_score']:.1f}% integrity - Issues found[/red]")
 
-                self.console.print(
-                    f"  • Verified files: {verification['verified_files']}"
-                )
+                self.console.print(f"  • Verified files: {verification['verified_files']}")
 
                 if verification["missing_files"]:
-                    self.console.print(
-                        f"  • [yellow]Missing files: {len(verification['missing_files'])}[/yellow]"
-                    )
+                    self.console.print(f"  • [yellow]Missing files: {len(verification['missing_files'])}[/yellow]")
 
                 if verification["corrupted_files"]:
-                    self.console.print(
-                        f"  • [red]Corrupted files: {len(verification['corrupted_files'])}[/red]"
-                    )
+                    self.console.print(f"  • [red]Corrupted files: {len(verification['corrupted_files'])}[/red]")
 
                 if verification["extra_files"]:
-                    self.console.print(
-                        f"  • Extra files: {len(verification['extra_files'])}"
-                    )
+                    self.console.print(f"  • Extra files: {len(verification['extra_files'])}")
 
             except Exception as e:
                 self.console.print(f"[red]❌ Verification failed: {e}[/red]")
@@ -1203,9 +1052,7 @@ class InteractiveMenu:
         """Verify existing backups"""
         self.console.print("[bold cyan]✅ Verify Existing Backups[/bold cyan]\n")
 
-        destinations = self.config_manager.config.get("backup", {}).get(
-            "destinations", []
-        )
+        destinations = self.config_manager.config.get("backup", {}).get("destinations", [])
         if not destinations:
             self.console.print("[red]❌ No backup destinations configured![/red]")
             input("\nPress Enter to continue...")
@@ -1217,9 +1064,7 @@ class InteractiveMenu:
 
         if questionary.confirm("\nStart verification process?").ask():
             # Get source directory (organized photos)
-            source_dir = self.config_manager.config.get("general", {}).get(
-                "destination_directory", "./organized"
-            )
+            source_dir = self.config_manager.config.get("general", {}).get("destination_directory", "./organized")
 
             # Initialize backup manager and verify
             from modules.backup_manager import BackupManager
@@ -1241,9 +1086,7 @@ class InteractiveMenu:
         table.add_column("Last Backup", style="green")
         table.add_column("Files", style="yellow")
 
-        destinations = self.config_manager.config.get("backup", {}).get(
-            "destinations", []
-        )
+        destinations = self.config_manager.config.get("backup", {}).get("destinations", [])
 
         if destinations:
             for dest in destinations:
@@ -1260,9 +1103,7 @@ class InteractiveMenu:
         self.console.print("[bold cyan]🔄 Restore from Backup[/bold cyan]\n")
 
         # Get backup destinations
-        destinations = self.config_manager.config.get("backup", {}).get(
-            "destinations", []
-        )
+        destinations = self.config_manager.config.get("backup", {}).get("destinations", [])
         if not destinations:
             self.console.print("[red]❌ No backup destinations configured![/red]")
             input("\nPress Enter to continue...")
@@ -1277,9 +1118,7 @@ class InteractiveMenu:
         candidates = backup_manager.get_restore_candidates(destinations)
 
         if not candidates["available_backups"]:
-            self.console.print(
-                "[red]❌ No usable backups found in any destination![/red]"
-            )
+            self.console.print("[red]❌ No usable backups found in any destination![/red]")
 
             # Show why other destinations weren't usable
             if candidates["unavailable_backups"]:
@@ -1291,35 +1130,23 @@ class InteractiveMenu:
                     errors = unavailable["errors"]
 
                     if not exists:
-                        self.console.print(
-                            f"  📁 {backup_dir} - [red]Directory doesn't exist[/red]"
-                        )
+                        self.console.print(f"  📁 {backup_dir} - [red]Directory doesn't exist[/red]")
                     elif total_files == 0:
-                        self.console.print(
-                            f"  📁 {backup_dir} - [yellow]No files found[/yellow]"
-                        )
+                        self.console.print(f"  📁 {backup_dir} - [yellow]No files found[/yellow]")
                     elif errors:
-                        self.console.print(
-                            f"  📁 {backup_dir} - [red]Errors: {', '.join(errors[:2])}[/red]"
-                        )
+                        self.console.print(f"  📁 {backup_dir} - [red]Errors: {', '.join(errors[:2])}[/red]")
                     else:
-                        self.console.print(
-                            f"  📁 {backup_dir} - [yellow]Unknown issue[/yellow]"
-                        )
+                        self.console.print(f"  📁 {backup_dir} - [yellow]Unknown issue[/yellow]")
 
             input("\nPress Enter to continue...")
             return
 
         # Display available backups
-        self.console.print(
-            f"\n[green]Found {len(candidates['available_backups'])} usable backup(s):[/green]"
-        )
+        self.console.print(f"\n[green]Found {len(candidates['available_backups'])} usable backup(s):[/green]")
 
         # Also show unavailable ones for transparency
         if candidates["unavailable_backups"]:
-            self.console.print(
-                f"[yellow]({len(candidates['unavailable_backups'])} destination(s) not usable)[/yellow]"
-            )
+            self.console.print(f"[yellow]({len(candidates['unavailable_backups'])} destination(s) not usable)[/yellow]")
 
             # Show details about unavailable backups
             self.console.print("\n[dim]Unavailable backup destinations:[/dim]")
@@ -1330,21 +1157,15 @@ class InteractiveMenu:
                 errors = unavailable["errors"]
 
                 if not exists:
-                    self.console.print(
-                        f"  📁 {backup_dir} - [red]Directory doesn't exist[/red]"
-                    )
+                    self.console.print(f"  📁 {backup_dir} - [red]Directory doesn't exist[/red]")
                 elif total_files == 0:
-                    self.console.print(
-                        f"  📁 {backup_dir} - [yellow]Empty (no files to restore)[/yellow]"
-                    )
+                    self.console.print(f"  📁 {backup_dir} - [yellow]Empty (no files to restore)[/yellow]")
                 elif errors:
                     self.console.print(f"  📁 {backup_dir} - [red]Access errors[/red]")
                     for error in errors[:2]:
                         self.console.print(f"    • [dim]{error}[/dim]")
                 else:
-                    self.console.print(
-                        f"  📁 {backup_dir} - [yellow]Unknown issue[/yellow]"
-                    )
+                    self.console.print(f"  📁 {backup_dir} - [yellow]Unknown issue[/yellow]")
         backup_choices = []
 
         for i, backup_info in enumerate(candidates["available_backups"], 1):
@@ -1358,27 +1179,19 @@ class InteractiveMenu:
             else:
                 mod_str = "Unknown"
 
-            status = (
-                "✅ Recommended"
-                if backup_dir == candidates["recommended_backup"]
-                else "📁 Available"
-            )
+            status = "✅ Recommended" if backup_dir == candidates["recommended_backup"] else "📁 Available"
 
             self.console.print(f"  {i}. {status}")
             self.console.print(f"     Path: {backup_dir}")
             self.console.print(f"     Files: {file_count:,} ({size_gb:.1f} GB)")
             self.console.print(f"     Last Modified: {mod_str}")
 
-            backup_choices.append(
-                f"{i}. {backup_dir} ({file_count:,} files, {mod_str})"
-            )
+            backup_choices.append(f"{i}. {backup_dir} ({file_count:,} files, {mod_str})")
 
         # Let user select backup
         backup_choices.append("Cancel")
 
-        backup_choice = questionary.select(
-            "\nSelect backup to restore from:", choices=backup_choices
-        ).ask()
+        backup_choice = questionary.select("\nSelect backup to restore from:", choices=backup_choices).ask()
 
         if not backup_choice or "Cancel" in backup_choice:
             return
@@ -1392,9 +1205,7 @@ class InteractiveMenu:
         self.console.print(f"\n[bold]Selected backup:[/bold] {backup_dir}")
 
         # Default to organized directory (most common use case)
-        restore_dir = self.config_manager.config.get("general", {}).get(
-            "destination_directory", "./organized"
-        )
+        restore_dir = self.config_manager.config.get("general", {}).get("destination_directory", "./organized")
 
         # Choose restore type
         restore_options = [
@@ -1404,18 +1215,14 @@ class InteractiveMenu:
             "Cancel",
         ]
 
-        restore_choice = questionary.select(
-            "Choose restore type:", choices=restore_options
-        ).ask()
+        restore_choice = questionary.select("Choose restore type:", choices=restore_options).ask()
 
         if not restore_choice or "Cancel" in restore_choice:
             return
 
         if "Full restore" in restore_choice:
             file_patterns = None
-            self.console.print(
-                f"[green]✓[/green] Will restore all files to: {restore_dir}"
-            )
+            self.console.print(f"[green]✓[/green] Will restore all files to: {restore_dir}")
 
         elif "Selective restore" in restore_choice:
             # Get file patterns
@@ -1426,9 +1233,7 @@ class InteractiveMenu:
 
             if pattern_input:
                 file_patterns = [p.strip() for p in pattern_input.split(",")]
-                self.console.print(
-                    f"[green]✓[/green] Will restore files matching: {', '.join(file_patterns)}"
-                )
+                self.console.print(f"[green]✓[/green] Will restore files matching: {', '.join(file_patterns)}")
                 self.console.print(f"[green]✓[/green] Destination: {restore_dir}")
             else:
                 file_patterns = None
@@ -1441,9 +1246,7 @@ class InteractiveMenu:
             ).ask()
 
             if alt_dest:
-                restore_dir = questionary.path(
-                    "Choose restore destination directory:", only_directories=True
-                ).ask()
+                restore_dir = questionary.path("Choose restore destination directory:", only_directories=True).ask()
 
                 if not restore_dir:
                     return
@@ -1460,35 +1263,25 @@ class InteractiveMenu:
                 file_patterns = None
 
         # Restore options
-        preserve_structure = questionary.confirm(
-            "Preserve directory structure?", default=True
-        ).ask()
+        preserve_structure = questionary.confirm("Preserve directory structure?", default=True).ask()
 
         overwrite_newer = questionary.confirm(
             "Overwrite files even if current files are newer? (recommended for restore)",
             default=True,
         ).ask()
 
-        dry_run = questionary.confirm(
-            "Run in dry-run mode (preview only)?", default=False
-        ).ask()
+        dry_run = questionary.confirm("Run in dry-run mode (preview only)?", default=False).ask()
 
         # Confirm restore
         self.console.print("\n[bold yellow]⚠️ Restore Summary:[/bold yellow]")
         self.console.print(f"  • From: {backup_dir}")
         self.console.print(f"  • To: {restore_dir}")
         self.console.print(f"  • Files: {selected_backup_info['total_files']:,}")
-        self.console.print(
-            f"  • Size: {selected_backup_info['total_size'] / (1024**3):.1f} GB"
-        )
+        self.console.print(f"  • Size: {selected_backup_info['total_size'] / (1024**3):.1f} GB")
         if file_patterns:
             self.console.print(f"  • Patterns: {', '.join(file_patterns)}")
-        self.console.print(
-            f"  • Preserve structure: {'Yes' if preserve_structure else 'No'}"
-        )
-        self.console.print(
-            f"  • Overwrite newer files: {'Yes' if overwrite_newer else 'No'}"
-        )
+        self.console.print(f"  • Preserve structure: {'Yes' if preserve_structure else 'No'}")
+        self.console.print(f"  • Overwrite newer files: {'Yes' if overwrite_newer else 'No'}")
         self.console.print(f"  • Mode: {'Dry run' if dry_run else 'Live restore'}")
 
         if not questionary.confirm("\nProceed with restore?").ask():
@@ -1543,20 +1336,14 @@ class InteractiveMenu:
                 size_mb = result["total_size_restored"] / (1024**2)
                 self.console.print(f"  • Size restored: {size_mb:.1f} MB")
 
-            self.console.print(
-                f"  • Restore time: {result['restore_time']:.2f} seconds"
-            )
+            self.console.print(f"  • Restore time: {result['restore_time']:.2f} seconds")
 
             if result["errors"]:
-                self.console.print(
-                    f"\n[yellow]⚠️ Errors encountered: {len(result['errors'])}[/yellow]"
-                )
+                self.console.print(f"\n[yellow]⚠️ Errors encountered: {len(result['errors'])}[/yellow]")
                 for error in result["errors"][:3]:  # Show first 3 errors
                     self.console.print(f"  - [red]{error}[/red]")
                 if len(result["errors"]) > 3:
-                    self.console.print(
-                        f"  - [dim]... and {len(result['errors']) - 3} more errors[/dim]"
-                    )
+                    self.console.print(f"  - [dim]... and {len(result['errors']) - 3} more errors[/dim]")
             else:
                 self.console.print("[green]✅ No errors encountered[/green]")
 
@@ -1570,17 +1357,13 @@ class InteractiveMenu:
         # Enable verification
         enable_verification = questionary.confirm(
             "Enable backup verification (checksums)?",
-            default=self.config_manager.config.get("backup", {}).get(
-                "enable_verification", True
-            ),
+            default=self.config_manager.config.get("backup", {}).get("enable_verification", True),
         ).ask()
 
         # Incremental mode
         incremental_mode = questionary.confirm(
             "Use incremental backup mode?",
-            default=self.config_manager.config.get("backup", {}).get(
-                "incremental_mode", True
-            ),
+            default=self.config_manager.config.get("backup", {}).get("incremental_mode", True),
         ).ask()
 
         # Use trash
@@ -1593,9 +1376,7 @@ class InteractiveMenu:
         if "backup" not in self.config_manager.config:
             self.config_manager.config["backup"] = {}
 
-        self.config_manager.config["backup"][
-            "enable_verification"
-        ] = enable_verification
+        self.config_manager.config["backup"]["enable_verification"] = enable_verification
         self.config_manager.config["backup"]["incremental_mode"] = incremental_mode
         self.config_manager.config["backup"]["use_trash"] = use_trash
 

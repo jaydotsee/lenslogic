@@ -2,8 +2,8 @@
 Tests for Progress Tracker utility
 """
 
-import sys
 import os
+import sys
 from unittest.mock import Mock, patch
 
 # Add src to path for imports

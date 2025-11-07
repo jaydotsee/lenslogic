@@ -1,32 +1,29 @@
 import logging
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
+
 from PIL import Image, ImageEnhance
-from PIL.Image import Transpose, Resampling
+from PIL.Image import Resampling, Transpose
 
 logger = logging.getLogger(__name__)
 
 
 class ImageProcessor:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.processing_config = config.get("image_processing", {})
         self.auto_rotate = self.processing_config.get("auto_rotate", True)
         self.auto_enhance = self.processing_config.get("auto_enhance", False)
-        self.generate_thumbnails = self.processing_config.get(
-            "generate_thumbnails", False
-        )
-        self.thumbnail_sizes = self.processing_config.get(
-            "thumbnail_sizes", [200, 400, 800]
-        )
+        self.generate_thumbnails = self.processing_config.get("generate_thumbnails", False)
+        self.thumbnail_sizes = self.processing_config.get("thumbnail_sizes", [200, 400, 800])
 
     def process_image(
         self,
         image_path: str,
-        metadata: Dict[str, Any],
-        output_path: Optional[str] = None,
+        metadata: dict[str, Any],
+        output_path: str | None = None,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process image with auto-rotation and optional enhancements"""
         result = {
             "original_path": image_path,
@@ -81,9 +78,7 @@ class ImageProcessor:
 
                 # Generate thumbnails if enabled
                 if self.generate_thumbnails:
-                    thumbnails = self._generate_thumbnails(
-                        img, image_path, output_path or image_path
-                    )
+                    thumbnails = self._generate_thumbnails(img, image_path, output_path or image_path)
                     result["thumbnails_created"] = thumbnails
 
         except Exception as e:
@@ -92,9 +87,7 @@ class ImageProcessor:
 
         return result
 
-    def _auto_rotate_image(
-        self, img: Image.Image, metadata: Dict[str, Any]
-    ) -> Image.Image:
+    def _auto_rotate_image(self, img: Image.Image, metadata: dict[str, Any]) -> Image.Image:
         """Auto-rotate image based on EXIF orientation"""
         orientation = metadata.get("orientation")
 
@@ -117,9 +110,7 @@ class ImageProcessor:
 
         if rotation != 0:
             img = img.rotate(-rotation, expand=True)
-            logger.debug(
-                f"Rotated image {rotation} degrees based on EXIF orientation {orientation}"
-            )
+            logger.debug(f"Rotated image {rotation} degrees based on EXIF orientation {orientation}")
 
         # Handle mirroring
         if orientation in [2, 4, 5, 7]:
@@ -153,9 +144,7 @@ class ImageProcessor:
             logger.debug(f"Error in auto-enhancement: {e}")
             return img
 
-    def _generate_thumbnails(
-        self, img: Image.Image, original_path: str, output_base_path: str
-    ) -> List[str]:
+    def _generate_thumbnails(self, img: Image.Image, original_path: str, output_base_path: str) -> list[str]:
         """Generate thumbnails in multiple sizes"""
         thumbnails = []
         base_path = Path(output_base_path)
@@ -180,13 +169,11 @@ class ImageProcessor:
                 logger.debug(f"Created thumbnail: {thumb_path}")
 
             except Exception as e:
-                logger.warning(
-                    f"Error creating {size}px thumbnail for {original_path}: {e}"
-                )
+                logger.warning(f"Error creating {size}px thumbnail for {original_path}: {e}")
 
         return thumbnails
 
-    def _needs_processing(self, metadata: Dict[str, Any]) -> bool:
+    def _needs_processing(self, metadata: dict[str, Any]) -> bool:
         """Check if image needs processing based on metadata"""
         needs_rotation = False
 
@@ -196,7 +183,7 @@ class ImageProcessor:
 
         return needs_rotation or self.auto_enhance or self.generate_thumbnails
 
-    def get_social_media_specs(self, platform: str) -> Dict[str, Any]:
+    def get_social_media_specs(self, platform: str) -> dict[str, Any]:
         """Get platform-specific image specifications"""
         specs = {
             "instagram": {
@@ -231,7 +218,7 @@ class ImageProcessor:
         format_type: str = "post",
         output_dir: str = None,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Optimize image for specific social media platform"""
         result = {
             "original_path": image_path,
@@ -245,9 +232,7 @@ class ImageProcessor:
         try:
             specs = self.get_social_media_specs(platform)
             if not specs or format_type not in specs:
-                result["error"] = (
-                    f"Unsupported platform/format: {platform}/{format_type}"
-                )
+                result["error"] = f"Unsupported platform/format: {platform}/{format_type}"
                 return result
 
             format_specs = specs[format_type]
@@ -297,9 +282,7 @@ class ImageProcessor:
                 output_dir_path.mkdir(exist_ok=True)
 
                 base_name = Path(image_path).stem
-                output_path = (
-                    output_dir_path / f"{base_name}_{platform}_{format_type}.jpg"
-                )
+                output_path = output_dir_path / f"{base_name}_{platform}_{format_type}.jpg"
 
                 # Save optimized image
                 img.save(output_path, "JPEG", quality=quality, optimize=True)
@@ -309,9 +292,7 @@ class ImageProcessor:
                 result["final_size"] = target_size
                 result["final_quality"] = quality
 
-                logger.info(
-                    f"Optimized {image_path} for {platform} {format_type}: {output_path}"
-                )
+                logger.info(f"Optimized {image_path} for {platform} {format_type}: {output_path}")
 
         except Exception as e:
             result["error"] = str(e)
@@ -321,19 +302,17 @@ class ImageProcessor:
 
     def batch_optimize_for_social_media(
         self,
-        image_paths: List[str],
+        image_paths: list[str],
         platform: str,
         format_type: str = "post",
         output_dir: str = None,
         dry_run: bool = False,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Batch optimize multiple images for social media"""
         results = []
 
         for image_path in image_paths:
-            result = self.optimize_for_social_media(
-                image_path, platform, format_type, output_dir, dry_run
-            )
+            result = self.optimize_for_social_media(image_path, platform, format_type, output_dir, dry_run)
             results.append(result)
 
         return results

@@ -2,7 +2,7 @@ import logging
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="pymediainfo")
@@ -17,9 +17,7 @@ try:
     logger.info("PyMediaInfo available - using for enhanced video metadata extraction")
 except ImportError:
     MEDIAINFO_AVAILABLE = False
-    logger.warning(
-        "PyMediaInfo not available - video metadata extraction will be limited"
-    )
+    logger.warning("PyMediaInfo not available - video metadata extraction will be limited")
 
 
 class EnhancedVideoExtractor:
@@ -27,7 +25,7 @@ class EnhancedVideoExtractor:
         self.cache = {}
         self.supported_formats = self._get_supported_formats()
 
-    def _get_supported_formats(self) -> List[str]:
+    def _get_supported_formats(self) -> list[str]:
         """Get list of supported video formats"""
         if MEDIAINFO_AVAILABLE:
             # Professional video formats supported by MediaInfo
@@ -82,7 +80,7 @@ class EnhancedVideoExtractor:
         else:
             return "Basic (Limited)"
 
-    def get_mediainfo_version(self) -> Optional[str]:
+    def get_mediainfo_version(self) -> str | None:
         """Get MediaInfo library version"""
         if MEDIAINFO_AVAILABLE:
             try:
@@ -93,11 +91,11 @@ class EnhancedVideoExtractor:
                 return "Unknown"
         return None
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """Get list of supported video formats"""
         return self.supported_formats.copy()
 
-    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> dict[str, Any]:
         """Extract comprehensive metadata from video file"""
         file_path_obj = Path(file_path)
 
@@ -112,9 +110,7 @@ class EnhancedVideoExtractor:
             try:
                 video_metadata = self._extract_with_mediainfo(str(file_path_obj))
                 metadata.update(video_metadata)
-                logger.debug(
-                    f"Extracted {len(metadata)} metadata fields with MediaInfo from {file_path_obj}"
-                )
+                logger.debug(f"Extracted {len(metadata)} metadata fields with MediaInfo from {file_path_obj}")
             except Exception as e:
                 logger.warning(f"MediaInfo extraction failed for {file_path_obj}: {e}")
                 # Fallback to basic extraction
@@ -126,26 +122,18 @@ class EnhancedVideoExtractor:
         self.cache[cache_key] = metadata.copy()
         return metadata
 
-    def _initialize_basic_metadata(self, file_path: Path) -> Dict[str, Any]:
+    def _initialize_basic_metadata(self, file_path: Path) -> dict[str, Any]:
         """Initialize basic file metadata"""
         return {
             "file_path": str(file_path),
             "file_name": file_path.name,
             "file_size": file_path.stat().st_size if file_path.exists() else 0,
             "file_extension": file_path.suffix.lower(),
-            "file_modified": (
-                datetime.fromtimestamp(file_path.stat().st_mtime)
-                if file_path.exists()
-                else None
-            ),
-            "file_created": (
-                datetime.fromtimestamp(file_path.stat().st_ctime)
-                if file_path.exists()
-                else None
-            ),
+            "file_modified": (datetime.fromtimestamp(file_path.stat().st_mtime) if file_path.exists() else None),
+            "file_created": (datetime.fromtimestamp(file_path.stat().st_ctime) if file_path.exists() else None),
         }
 
-    def _extract_with_mediainfo(self, file_path: str) -> Dict[str, Any]:
+    def _extract_with_mediainfo(self, file_path: str) -> dict[str, Any]:
         """Extract metadata using PyMediaInfo"""
         metadata = {}
 
@@ -166,7 +154,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_general_track(self, track) -> Dict[str, Any]:
+    def _process_general_track(self, track) -> dict[str, Any]:
         """Process general track information"""
         metadata = {}
 
@@ -183,15 +171,11 @@ class EnhancedVideoExtractor:
 
         # Creation time
         if hasattr(track, "encoded_date"):
-            metadata["encoded_date"] = self._parse_mediainfo_datetime(
-                track.encoded_date
-            )
+            metadata["encoded_date"] = self._parse_mediainfo_datetime(track.encoded_date)
         if hasattr(track, "tagged_date"):
             metadata["tagged_date"] = self._parse_mediainfo_datetime(track.tagged_date)
         if hasattr(track, "file_last_modification_date"):
-            metadata["modification_date"] = self._parse_mediainfo_datetime(
-                track.file_last_modification_date
-            )
+            metadata["modification_date"] = self._parse_mediainfo_datetime(track.file_last_modification_date)
 
         # Use the best available datetime as primary
         for date_field in ["encoded_date", "tagged_date", "modification_date"]:
@@ -221,7 +205,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_video_track(self, track) -> Dict[str, Any]:
+    def _process_video_track(self, track) -> dict[str, Any]:
         """Process video track information"""
         metadata = {}
 
@@ -239,9 +223,7 @@ class EnhancedVideoExtractor:
 
         # Frame rate and timing
         if hasattr(track, "frame_rate"):
-            metadata["video_framerate"] = (
-                float(track.frame_rate) if track.frame_rate else None
-            )
+            metadata["video_framerate"] = float(track.frame_rate) if track.frame_rate else None
         if hasattr(track, "frame_count"):
             metadata["video_frame_count"] = track.frame_count
 
@@ -271,7 +253,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_audio_track(self, track) -> Dict[str, Any]:
+    def _process_audio_track(self, track) -> dict[str, Any]:
         """Process audio track information"""
         metadata = {}
 
@@ -297,7 +279,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _extract_basic_metadata(self, file_path: Path) -> Dict[str, Any]:
+    def _extract_basic_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract basic metadata when MediaInfo is not available"""
         metadata = {}
 
@@ -309,15 +291,13 @@ class EnhancedVideoExtractor:
                 "video_height": None,
                 "video_codec": None,
                 "audio_codec": None,
-                "container_format": (
-                    file_path.suffix[1:].upper() if file_path.suffix else "Unknown"
-                ),
+                "container_format": (file_path.suffix[1:].upper() if file_path.suffix else "Unknown"),
             }
         )
 
         return metadata
 
-    def _parse_mediainfo_datetime(self, date_str: str) -> Optional[datetime]:
+    def _parse_mediainfo_datetime(self, date_str: str) -> datetime | None:
         """Parse datetime from MediaInfo output"""
         if not date_str:
             return None
@@ -368,7 +348,7 @@ class EnhancedVideoExtractor:
         except (ValueError, TypeError):
             return "Unknown"
 
-    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
+    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
         """Get the best available capture datetime for video"""
         date_sources = [
             "datetime_original",

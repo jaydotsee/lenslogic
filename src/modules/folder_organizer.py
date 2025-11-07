@@ -2,24 +2,20 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class FolderOrganizer:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.org_config = config.get("organization", {})
-        self.folder_structure = self.org_config.get(
-            "folder_structure", "{year}/{month:02d}/{day:02d}"
-        )
+        self.folder_structure = self.org_config.get("folder_structure", "{year}/{month:02d}/{day:02d}")
         self.folder_structure_with_location = self.org_config.get(
             "folder_structure_with_location", "{year}/{month:02d}/{day:02d}/{city}"
         )
-        self.folder_structure_templates = self.org_config.get(
-            "folder_structure_templates", {}
-        )
+        self.folder_structure_templates = self.org_config.get("folder_structure_templates", {})
         self.separate_raw = self.org_config.get("separate_raw", True)
         self.raw_folder = self.org_config.get("raw_folder", "RAW")
         self.jpg_folder = self.org_config.get("jpg_folder", "JPG")
@@ -31,22 +27,16 @@ class FolderOrganizer:
         self.location_components = self.geo_config.get("location_components", "city")
 
         self.file_types = config.get("file_types", {})
-        self.raw_extensions = set(
-            "." + ext.lower() for ext in self.file_types.get("raw", [])
-        )
-        self.image_extensions = set(
-            "." + ext.lower() for ext in self.file_types.get("images", [])
-        )
-        self.video_extensions = set(
-            "." + ext.lower() for ext in self.file_types.get("videos", [])
-        )
+        self.raw_extensions = set("." + ext.lower() for ext in self.file_types.get("raw", []))
+        self.image_extensions = set("." + ext.lower() for ext in self.file_types.get("images", []))
+        self.video_extensions = set("." + ext.lower() for ext in self.file_types.get("videos", []))
 
     def determine_destination_path(
         self,
         file_path: str,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         base_destination: str,
-        location_info: Optional[Dict[str, str]] = None,
+        location_info: dict[str, str] | None = None,
     ) -> Path:
         file_path_obj = Path(file_path)
         extension = file_path_obj.suffix.lower()
@@ -56,9 +46,7 @@ class FolderOrganizer:
             capture_datetime = datetime.now()
             logger.warning(f"No datetime found for {file_path_obj}, using current time")
 
-        folder_path = self._format_folder_structure(
-            capture_datetime, metadata, location_info
-        )
+        folder_path = self._format_folder_structure(capture_datetime, metadata, location_info)
 
         file_type_folder = self._determine_file_type_folder(extension)
 
@@ -71,9 +59,7 @@ class FolderOrganizer:
 
         return destination
 
-    def _get_datetime_from_metadata(
-        self, metadata: Dict[str, Any]
-    ) -> Optional[datetime]:
+    def _get_datetime_from_metadata(self, metadata: dict[str, Any]) -> datetime | None:
         date_sources = self.org_config.get(
             "date_sources",
             [
@@ -100,8 +86,8 @@ class FolderOrganizer:
     def _format_folder_structure(
         self,
         capture_datetime: datetime,
-        metadata: Dict[str, Any],
-        location_info: Optional[Dict[str, str]] = None,
+        metadata: dict[str, Any],
+        location_info: dict[str, str] | None = None,
     ) -> str:
         variables = {
             "year": capture_datetime.year,
@@ -119,9 +105,7 @@ class FolderOrganizer:
         camera_make = (metadata.get("camera_make") or "").strip()
         camera_model = (metadata.get("camera_model") or "").strip()
         if camera_model or camera_make:
-            variables["camera"] = self._simplify_camera_name_enhanced(
-                camera_make, camera_model
-            )
+            variables["camera"] = self._simplify_camera_name_enhanced(camera_make, camera_model)
         else:
             variables["camera"] = ""
 
@@ -148,18 +132,12 @@ class FolderOrganizer:
             return folder_path
         except KeyError as e:
             logger.error(f"Invalid folder structure variable: {e}")
-            return (
-                f"{variables['year']}/{variables['month']:02d}/{variables['day']:02d}"
-            )
+            return f"{variables['year']}/{variables['month']:02d}/{variables['day']:02d}"
         except Exception as e:
             logger.error(f"Error formatting folder structure: {e}")
-            return (
-                f"{variables['year']}/{variables['month']:02d}/{variables['day']:02d}"
-            )
+            return f"{variables['year']}/{variables['month']:02d}/{variables['day']:02d}"
 
-    def _prepare_location_variables(
-        self, location_info: Dict[str, str]
-    ) -> Dict[str, str]:
+    def _prepare_location_variables(self, location_info: dict[str, str]) -> dict[str, str]:
         """Prepare location variables based on configuration"""
         result = {}
 
@@ -207,7 +185,7 @@ class FolderOrganizer:
 
         return result
 
-    def _determine_file_type_folder(self, extension: str) -> Optional[str]:
+    def _determine_file_type_folder(self, extension: str) -> str | None:
         if not self.separate_raw:
             return None
 
@@ -229,9 +207,7 @@ class FolderOrganizer:
         # Use the new slugger with enhanced pattern matching
         return get_camera_slug("", camera_name, custom_mappings)
 
-    def _simplify_camera_name_enhanced(
-        self, camera_make: str, camera_model: str
-    ) -> str:
+    def _simplify_camera_name_enhanced(self, camera_make: str, camera_model: str) -> str:
         from utils.camera_slugger import get_camera_slug
 
         # Get custom mappings from config
@@ -247,7 +223,7 @@ class FolderOrganizer:
         new_filename: str,
         dry_run: bool = False,
         preserve_original: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         source = Path(source_path)
         destination = destination_folder / new_filename
 
@@ -273,9 +249,7 @@ class FolderOrganizer:
                 logger.info(f"Skipping {source}, already at destination")
                 return result
             else:
-                result["error"] = (
-                    f"Different file already exists at destination: {destination}"
-                )
+                result["error"] = f"Different file already exists at destination: {destination}"
                 logger.warning(result["error"])
                 return result
 
@@ -330,7 +304,7 @@ class FolderOrganizer:
         self,
         source_path: str,
         destination_path: str,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         dry_run: bool = False,
     ) -> bool:
         if dry_run:
@@ -352,7 +326,7 @@ class FolderOrganizer:
             logger.error(f"Error creating sidecar files: {e}")
             return False
 
-    def _generate_xmp_content(self, metadata: Dict[str, Any]) -> str:
+    def _generate_xmp_content(self, metadata: dict[str, Any]) -> str:
         xmp_template = """<?xml version="1.0" encoding="UTF-8"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -373,49 +347,33 @@ class FolderOrganizer:
 
         # === CORE CAMERA INFORMATION ===
         if metadata.get("camera_make"):
-            properties.append(
-                f'<tiff:Make>{self._escape_xml(metadata["camera_make"])}</tiff:Make>'
-            )
+            properties.append(f'<tiff:Make>{self._escape_xml(metadata["camera_make"])}</tiff:Make>')
         if metadata.get("camera_model"):
-            properties.append(
-                f'<tiff:Model>{self._escape_xml(metadata["camera_model"])}</tiff:Model>'
-            )
+            properties.append(f'<tiff:Model>{self._escape_xml(metadata["camera_model"])}</tiff:Model>')
         if metadata.get("software"):
-            properties.append(
-                f'<tiff:Software>{self._escape_xml(metadata["software"])}</tiff:Software>'
-            )
+            properties.append(f'<tiff:Software>{self._escape_xml(metadata["software"])}</tiff:Software>')
 
         # === DATETIME INFORMATION ===
         if metadata.get("datetime_original"):
             dt = metadata["datetime_original"]
             if isinstance(dt, datetime):
-                properties.append(
-                    f"<exif:DateTimeOriginal>{dt.isoformat()}</exif:DateTimeOriginal>"
-                )
+                properties.append(f"<exif:DateTimeOriginal>{dt.isoformat()}</exif:DateTimeOriginal>")
                 properties.append(f"<xmp:CreateDate>{dt.isoformat()}</xmp:CreateDate>")
         if metadata.get("datetime_digitized"):
             dt = metadata["datetime_digitized"]
             if isinstance(dt, datetime):
-                properties.append(
-                    f"<exif:DateTimeDigitized>{dt.isoformat()}</exif:DateTimeDigitized>"
-                )
+                properties.append(f"<exif:DateTimeDigitized>{dt.isoformat()}</exif:DateTimeDigitized>")
 
         # === EXPOSURE SETTINGS ===
         if metadata.get("iso"):
-            properties.append(
-                f'<exif:ISOSpeedRatings>{metadata["iso"]}</exif:ISOSpeedRatings>'
-            )
+            properties.append(f'<exif:ISOSpeedRatings>{metadata["iso"]}</exif:ISOSpeedRatings>')
         if metadata.get("f_number"):
             properties.append(f'<exif:FNumber>{metadata["f_number"]}</exif:FNumber>')
         if metadata.get("exposure_time"):
-            properties.append(
-                f'<exif:ExposureTime>{metadata["exposure_time"]}</exif:ExposureTime>'
-            )
+            properties.append(f'<exif:ExposureTime>{metadata["exposure_time"]}</exif:ExposureTime>')
         if metadata.get("exposure_mode") is not None:
             exposure_modes = {0: "Auto", 1: "Manual", 2: "Auto bracket"}
-            mode = exposure_modes.get(
-                metadata["exposure_mode"], str(metadata["exposure_mode"])
-            )
+            mode = exposure_modes.get(metadata["exposure_mode"], str(metadata["exposure_mode"]))
             properties.append(f"<exif:ExposureMode>{mode}</exif:ExposureMode>")
         if metadata.get("exposure_program") is not None:
             program_modes = {
@@ -429,20 +387,14 @@ class FolderOrganizer:
                 7: "Portrait mode",
                 8: "Landscape mode",
             }
-            program = program_modes.get(
-                metadata["exposure_program"], str(metadata["exposure_program"])
-            )
+            program = program_modes.get(metadata["exposure_program"], str(metadata["exposure_program"]))
             properties.append(f"<exif:ExposureProgram>{program}</exif:ExposureProgram>")
 
         # === LENS INFORMATION ===
         if metadata.get("lens_model"):
-            properties.append(
-                f'<exif:LensModel>{self._escape_xml(metadata["lens_model"])}</exif:LensModel>'
-            )
+            properties.append(f'<exif:LensModel>{self._escape_xml(metadata["lens_model"])}</exif:LensModel>')
         if metadata.get("focal_length"):
-            properties.append(
-                f'<exif:FocalLength>{metadata["focal_length"]}</exif:FocalLength>'
-            )
+            properties.append(f'<exif:FocalLength>{metadata["focal_length"]}</exif:FocalLength>')
         if metadata.get("focal_length_35mm"):
             properties.append(
                 f'<exif:FocalLengthIn35mmFilm>{metadata["focal_length_35mm"]}</exif:FocalLengthIn35mmFilm>'
@@ -450,29 +402,19 @@ class FolderOrganizer:
 
         # === FOCUS INFORMATION ===
         if metadata.get("focus_mode"):
-            properties.append(
-                f'<aux:FocusMode>{self._escape_xml(metadata["focus_mode"])}</aux:FocusMode>'
-            )
+            properties.append(f'<aux:FocusMode>{self._escape_xml(metadata["focus_mode"])}</aux:FocusMode>')
         if metadata.get("focus_distance"):
-            properties.append(
-                f'<aux:FocusDistance>{metadata["focus_distance"]}</aux:FocusDistance>'
-            )
+            properties.append(f'<aux:FocusDistance>{metadata["focus_distance"]}</aux:FocusDistance>')
         if metadata.get("af_area_mode"):
-            properties.append(
-                f'<aux:AFAreaMode>{metadata["af_area_mode"]}</aux:AFAreaMode>'
-            )
+            properties.append(f'<aux:AFAreaMode>{metadata["af_area_mode"]}</aux:AFAreaMode>')
 
         # === FLASH INFORMATION ===
         if metadata.get("flash") is not None:
             properties.append(f'<exif:Flash>{metadata["flash"]}</exif:Flash>')
         if metadata.get("flash_fired") is not None:
-            properties.append(
-                f'<exif:FlashFired>{str(metadata["flash_fired"]).lower()}</exif:FlashFired>'
-            )
+            properties.append(f'<exif:FlashFired>{str(metadata["flash_fired"]).lower()}</exif:FlashFired>')
         if metadata.get("flash_mode"):
-            properties.append(
-                f'<aux:FlashMode>{self._escape_xml(metadata["flash_mode"])}</aux:FlashMode>'
-            )
+            properties.append(f'<aux:FlashMode>{self._escape_xml(metadata["flash_mode"])}</aux:FlashMode>')
 
         # === METERING AND WHITE BALANCE ===
         if metadata.get("metering_mode") is not None:
@@ -486,9 +428,7 @@ class FolderOrganizer:
                 6: "Partial",
                 255: "Other",
             }
-            mode = metering_modes.get(
-                metadata["metering_mode"], str(metadata["metering_mode"])
-            )
+            mode = metering_modes.get(metadata["metering_mode"], str(metadata["metering_mode"]))
             properties.append(f"<exif:MeteringMode>{mode}</exif:MeteringMode>")
         if metadata.get("white_balance") is not None:
             wb_modes = {0: "Auto", 1: "Manual"}
@@ -498,20 +438,12 @@ class FolderOrganizer:
         # === IMAGE DIMENSIONS AND ORIENTATION ===
         if metadata.get("width"):
             properties.append(f'<tiff:ImageWidth>{metadata["width"]}</tiff:ImageWidth>')
-            properties.append(
-                f'<exif:PixelXDimension>{metadata["width"]}</exif:PixelXDimension>'
-            )
+            properties.append(f'<exif:PixelXDimension>{metadata["width"]}</exif:PixelXDimension>')
         if metadata.get("height"):
-            properties.append(
-                f'<tiff:ImageLength>{metadata["height"]}</tiff:ImageLength>'
-            )
-            properties.append(
-                f'<exif:PixelYDimension>{metadata["height"]}</exif:PixelYDimension>'
-            )
+            properties.append(f'<tiff:ImageLength>{metadata["height"]}</tiff:ImageLength>')
+            properties.append(f'<exif:PixelYDimension>{metadata["height"]}</exif:PixelYDimension>')
         if metadata.get("orientation") is not None:
-            properties.append(
-                f'<tiff:Orientation>{metadata["orientation"]}</tiff:Orientation>'
-            )
+            properties.append(f'<tiff:Orientation>{metadata["orientation"]}</tiff:Orientation>')
 
         # === PROFESSIONAL CAMERA SETTINGS ===
         if metadata.get("scene_mode") is not None:
@@ -537,21 +469,15 @@ class FolderOrganizer:
             properties.append(f"<exif:SceneCaptureType>{scene}</exif:SceneCaptureType>")
 
         if metadata.get("shooting_mode"):
-            properties.append(
-                f'<aux:ShootingMode>{self._escape_xml(metadata["shooting_mode"])}</aux:ShootingMode>'
-            )
+            properties.append(f'<aux:ShootingMode>{self._escape_xml(metadata["shooting_mode"])}</aux:ShootingMode>')
         if metadata.get("image_quality"):
-            properties.append(
-                f'<aux:ImageQuality>{self._escape_xml(metadata["image_quality"])}</aux:ImageQuality>'
-            )
+            properties.append(f'<aux:ImageQuality>{self._escape_xml(metadata["image_quality"])}</aux:ImageQuality>')
         if metadata.get("noise_reduction"):
             properties.append(
                 f'<aux:NoiseReduction>{self._escape_xml(metadata["noise_reduction"])}</aux:NoiseReduction>'
             )
         if metadata.get("vignette_control"):
-            properties.append(
-                f'<aux:VignetteControl>{metadata["vignette_control"]}</aux:VignetteControl>'
-            )
+            properties.append(f'<aux:VignetteControl>{metadata["vignette_control"]}</aux:VignetteControl>')
 
         # === FILE INFORMATION ===
         if metadata.get("file_name"):
@@ -559,13 +485,9 @@ class FolderOrganizer:
                 f'<photoshop:DocumentAncestors><rdf:Bag><rdf:li>{self._escape_xml(metadata["file_name"])}</rdf:li></rdf:Bag></photoshop:DocumentAncestors>'
             )
         if metadata.get("file_size"):
-            properties.append(
-                "<tiff:BitsPerSample>16</tiff:BitsPerSample>"
-            )  # Assuming RAW
+            properties.append("<tiff:BitsPerSample>16</tiff:BitsPerSample>")  # Assuming RAW
         if metadata.get("file_extension"):
-            properties.append(
-                f'<dc:format>image/{metadata["file_extension"][1:].lower()}</dc:format>'
-            )
+            properties.append(f'<dc:format>image/{metadata["file_extension"][1:].lower()}</dc:format>')
 
         # === GPS INFORMATION ===
         if metadata.get("gps"):
@@ -574,37 +496,25 @@ class FolderOrganizer:
                 lat = gps["latitude"]
                 lat_ref = "N" if lat >= 0 else "S"
                 properties.append(f"<exif:GPSLatitude>{abs(lat)}</exif:GPSLatitude>")
-                properties.append(
-                    f"<exif:GPSLatitudeRef>{lat_ref}</exif:GPSLatitudeRef>"
-                )
+                properties.append(f"<exif:GPSLatitudeRef>{lat_ref}</exif:GPSLatitudeRef>")
             if gps.get("longitude") is not None:
                 lon = gps["longitude"]
                 lon_ref = "E" if lon >= 0 else "W"
                 properties.append(f"<exif:GPSLongitude>{abs(lon)}</exif:GPSLongitude>")
-                properties.append(
-                    f"<exif:GPSLongitudeRef>{lon_ref}</exif:GPSLongitudeRef>"
-                )
+                properties.append(f"<exif:GPSLongitudeRef>{lon_ref}</exif:GPSLongitudeRef>")
             if gps.get("altitude") is not None:
-                properties.append(
-                    f'<exif:GPSAltitude>{gps["altitude"]}</exif:GPSAltitude>'
-                )
+                properties.append(f'<exif:GPSAltitude>{gps["altitude"]}</exif:GPSAltitude>')
                 properties.append("<exif:GPSAltitudeRef>0</exif:GPSAltitudeRef>")
 
         # === GEOLOCATION INFORMATION ===
         if metadata.get("location"):
             location = metadata["location"]
             if location.get("city"):
-                properties.append(
-                    f'<photoshop:City>{self._escape_xml(location["city"])}</photoshop:City>'
-                )
+                properties.append(f'<photoshop:City>{self._escape_xml(location["city"])}</photoshop:City>')
             if location.get("country"):
-                properties.append(
-                    f'<photoshop:Country>{self._escape_xml(location["country"])}</photoshop:Country>'
-                )
+                properties.append(f'<photoshop:Country>{self._escape_xml(location["country"])}</photoshop:Country>')
             if location.get("state"):
-                properties.append(
-                    f'<photoshop:State>{self._escape_xml(location["state"])}</photoshop:State>'
-                )
+                properties.append(f'<photoshop:State>{self._escape_xml(location["state"])}</photoshop:State>')
 
         # === CREATOR INFORMATION ===
         if metadata.get("artist"):
@@ -615,9 +525,7 @@ class FolderOrganizer:
                 f'<photoshop:AuthorsPosition>{self._escape_xml(metadata["artist"])}</photoshop:AuthorsPosition>'
             )
         if metadata.get("copyright"):
-            properties.append(
-                f'<dc:rights>{self._escape_xml(metadata["copyright"])}</dc:rights>'
-            )
+            properties.append(f'<dc:rights>{self._escape_xml(metadata["copyright"])}</dc:rights>')
             properties.append(
                 f'<xmp:Rights><rdf:Alt><rdf:li xml:lang="x-default">{self._escape_xml(metadata["copyright"])}</rdf:li></rdf:Alt></xmp:Rights>'
             )
@@ -626,35 +534,21 @@ class FolderOrganizer:
         if metadata.get("media_type") == "video":
             # Video format and codec information
             if metadata.get("video_codec"):
-                properties.append(
-                    f'<aux:VideoCodec>{self._escape_xml(metadata["video_codec"])}</aux:VideoCodec>'
-                )
+                properties.append(f'<aux:VideoCodec>{self._escape_xml(metadata["video_codec"])}</aux:VideoCodec>')
             if metadata.get("video_profile"):
-                properties.append(
-                    f'<aux:VideoProfile>{self._escape_xml(metadata["video_profile"])}</aux:VideoProfile>'
-                )
+                properties.append(f'<aux:VideoProfile>{self._escape_xml(metadata["video_profile"])}</aux:VideoProfile>')
             if metadata.get("video_level"):
-                properties.append(
-                    f'<aux:VideoLevel>{self._escape_xml(metadata["video_level"])}</aux:VideoLevel>'
-                )
+                properties.append(f'<aux:VideoLevel>{self._escape_xml(metadata["video_level"])}</aux:VideoLevel>')
 
             # Video quality and technical specs
             if metadata.get("video_bitrate"):
-                properties.append(
-                    f'<aux:VideoBitrate>{metadata["video_bitrate"]}</aux:VideoBitrate>'
-                )
+                properties.append(f'<aux:VideoBitrate>{metadata["video_bitrate"]}</aux:VideoBitrate>')
             if metadata.get("video_framerate"):
-                properties.append(
-                    f'<aux:VideoFrameRate>{metadata["video_framerate"]}</aux:VideoFrameRate>'
-                )
+                properties.append(f'<aux:VideoFrameRate>{metadata["video_framerate"]}</aux:VideoFrameRate>')
             if metadata.get("video_frame_count"):
-                properties.append(
-                    f'<aux:VideoFrameCount>{metadata["video_frame_count"]}</aux:VideoFrameCount>'
-                )
+                properties.append(f'<aux:VideoFrameCount>{metadata["video_frame_count"]}</aux:VideoFrameCount>')
             if metadata.get("video_bit_depth"):
-                properties.append(
-                    f'<aux:VideoBitDepth>{metadata["video_bit_depth"]}</aux:VideoBitDepth>'
-                )
+                properties.append(f'<aux:VideoBitDepth>{metadata["video_bit_depth"]}</aux:VideoBitDepth>')
             if metadata.get("video_color_space"):
                 properties.append(
                     f'<aux:VideoColorSpace>{self._escape_xml(metadata["video_color_space"])}</aux:VideoColorSpace>'
@@ -680,25 +574,15 @@ class FolderOrganizer:
 
             # Audio information
             if metadata.get("audio_codec"):
-                properties.append(
-                    f'<aux:AudioCodec>{self._escape_xml(metadata["audio_codec"])}</aux:AudioCodec>'
-                )
+                properties.append(f'<aux:AudioCodec>{self._escape_xml(metadata["audio_codec"])}</aux:AudioCodec>')
             if metadata.get("audio_bitrate"):
-                properties.append(
-                    f'<aux:AudioBitrate>{metadata["audio_bitrate"]}</aux:AudioBitrate>'
-                )
+                properties.append(f'<aux:AudioBitrate>{metadata["audio_bitrate"]}</aux:AudioBitrate>')
             if metadata.get("audio_sample_rate"):
-                properties.append(
-                    f'<aux:AudioSampleRate>{metadata["audio_sample_rate"]}</aux:AudioSampleRate>'
-                )
+                properties.append(f'<aux:AudioSampleRate>{metadata["audio_sample_rate"]}</aux:AudioSampleRate>')
             if metadata.get("audio_channels"):
-                properties.append(
-                    f'<aux:AudioChannels>{metadata["audio_channels"]}</aux:AudioChannels>'
-                )
+                properties.append(f'<aux:AudioChannels>{metadata["audio_channels"]}</aux:AudioChannels>')
             if metadata.get("audio_bit_depth"):
-                properties.append(
-                    f'<aux:AudioBitDepth>{metadata["audio_bit_depth"]}</aux:AudioBitDepth>'
-                )
+                properties.append(f'<aux:AudioBitDepth>{metadata["audio_bit_depth"]}</aux:AudioBitDepth>')
             if metadata.get("audio_language"):
                 properties.append(
                     f'<aux:AudioLanguage>{self._escape_xml(metadata["audio_language"])}</aux:AudioLanguage>'
@@ -706,9 +590,7 @@ class FolderOrganizer:
 
             # Video duration and timing
             if metadata.get("duration_seconds"):
-                properties.append(
-                    f'<aux:Duration>{metadata["duration_seconds"]}</aux:Duration>'
-                )
+                properties.append(f'<aux:Duration>{metadata["duration_seconds"]}</aux:Duration>')
             if metadata.get("duration_formatted"):
                 properties.append(
                     f'<aux:DurationFormatted>{self._escape_xml(metadata["duration_formatted"])}</aux:DurationFormatted>'
@@ -716,9 +598,7 @@ class FolderOrganizer:
 
             # Video encoding information
             if metadata.get("video_encoder"):
-                properties.append(
-                    f'<aux:VideoEncoder>{self._escape_xml(metadata["video_encoder"])}</aux:VideoEncoder>'
-                )
+                properties.append(f'<aux:VideoEncoder>{self._escape_xml(metadata["video_encoder"])}</aux:VideoEncoder>')
             if metadata.get("video_encoder_version"):
                 properties.append(
                     f'<aux:VideoEncoderVersion>{self._escape_xml(metadata["video_encoder_version"])}</aux:VideoEncoderVersion>'
@@ -728,21 +608,13 @@ class FolderOrganizer:
                     f'<aux:EncodingLibrary>{self._escape_xml(metadata["encoding_library"])}</aux:EncodingLibrary>'
                 )
             if metadata.get("overall_bitrate"):
-                properties.append(
-                    f'<aux:OverallBitrate>{metadata["overall_bitrate"]}</aux:OverallBitrate>'
-                )
+                properties.append(f'<aux:OverallBitrate>{metadata["overall_bitrate"]}</aux:OverallBitrate>')
 
         # === LENSLOGIC PROCESSING INFORMATION ===
         tool_name = "LensLogic - Professional Photo & Video Organizer"
-        extraction_method = (
-            "PyExifTool & PyMediaInfo"
-            if metadata.get("media_type") == "video"
-            else "PyExifTool"
-        )
+        extraction_method = "PyExifTool & PyMediaInfo" if metadata.get("media_type") == "video" else "PyExifTool"
         properties.append(f"<xmp:CreatorTool>{tool_name}</xmp:CreatorTool>")
-        properties.append(
-            f"<xmp:ModifyDate>{datetime.now().isoformat()}</xmp:ModifyDate>"
-        )
+        properties.append(f"<xmp:ModifyDate>{datetime.now().isoformat()}</xmp:ModifyDate>")
         properties.append(
             f"<photoshop:Instructions>Processed by LensLogic with enhanced metadata extraction using {extraction_method}</photoshop:Instructions>"
         )
@@ -761,7 +633,7 @@ class FolderOrganizer:
             .replace("'", "&#39;")
         )
 
-    def get_statistics(self, source_directory: str) -> Dict[str, Any]:
+    def get_statistics(self, source_directory: str) -> dict[str, Any]:
         source_path = Path(source_directory)
 
         if not source_path.exists():

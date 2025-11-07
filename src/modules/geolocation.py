@@ -1,24 +1,23 @@
-import logging
+import hashlib
 import json
+import logging
 import time
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Any
+
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-import hashlib
 
 logger = logging.getLogger(__name__)
 
 
 class GeolocationService:
-    def __init__(self, config: Dict[str, Any], cache_dir: Optional[str] = None):
+    def __init__(self, config: dict[str, Any], cache_dir: str | None = None):
         self.config = config.get("geolocation", {})
         self.enabled = self.config.get("enabled", True)
         self.reverse_geocode = self.config.get("reverse_geocode", True)
         self.add_location_to_folder = self.config.get("add_location_to_folder", False)
-        self.location_folder_pattern = self.config.get(
-            "location_folder_pattern", "{country}/{city}"
-        )
+        self.location_folder_pattern = self.config.get("location_folder_pattern", "{country}/{city}")
         self.cache_lookups = self.config.get("cache_lookups", True)
 
         self.geolocator = Nominatim(user_agent="lenslogic/1.0")
@@ -35,12 +34,12 @@ class GeolocationService:
         self.last_request_time = 0
         self.min_delay = 1.0
 
-    def _load_cache(self) -> Dict[str, Any]:
+    def _load_cache(self) -> dict[str, Any]:
         if not self.cache_lookups or not self.cache_file.exists():
             return {}
 
         try:
-            with open(self.cache_file, "r", encoding="utf-8") as f:
+            with open(self.cache_file, encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
             logger.warning(f"Could not load geocache: {e}")
@@ -56,9 +55,7 @@ class GeolocationService:
         except Exception as e:
             logger.warning(f"Could not save geocache: {e}")
 
-    def get_location_info(
-        self, latitude: float, longitude: float
-    ) -> Optional[Dict[str, str]]:
+    def get_location_info(self, latitude: float, longitude: float) -> dict[str, str] | None:
         if not self.enabled or not self.reverse_geocode:
             return None
 
@@ -83,9 +80,7 @@ class GeolocationService:
         key_string = f"{rounded_lat}:{rounded_lon}"
         return hashlib.md5(key_string.encode()).hexdigest()
 
-    def _reverse_geocode(
-        self, latitude: float, longitude: float
-    ) -> Optional[Dict[str, str]]:
+    def _reverse_geocode(self, latitude: float, longitude: float) -> dict[str, str] | None:
         current_time = time.time()
         elapsed = current_time - self.last_request_time
 
@@ -107,9 +102,7 @@ class GeolocationService:
                 "country_code": address.get("country_code", "").upper(),
                 "state": address.get("state", address.get("region", "")),
                 "county": address.get("county", ""),
-                "city": address.get(
-                    "city", address.get("town", address.get("village", ""))
-                ),
+                "city": address.get("city", address.get("town", address.get("village", ""))),
                 "suburb": address.get("suburb", address.get("neighbourhood", "")),
                 "postcode": address.get("postcode", ""),
                 "road": address.get("road", ""),
@@ -145,7 +138,7 @@ class GeolocationService:
 
         return text[:50]
 
-    def _create_display_name(self, location_info: Dict[str, str]) -> str:
+    def _create_display_name(self, location_info: dict[str, str]) -> str:
         parts = []
 
         if location_info.get("city"):
@@ -161,7 +154,7 @@ class GeolocationService:
 
         return ", ".join(parts) if parts else "Unknown Location"
 
-    def format_location_folder(self, location_info: Dict[str, str]) -> str:
+    def format_location_folder(self, location_info: dict[str, str]) -> str:
         if not location_info or not self.add_location_to_folder:
             return ""
 
@@ -179,9 +172,7 @@ class GeolocationService:
             logger.error(f"Error formatting location folder: {e}")
             return ""
 
-    def extract_gps_from_metadata(
-        self, metadata: Dict[str, Any]
-    ) -> Optional[Tuple[float, float]]:
+    def extract_gps_from_metadata(self, metadata: dict[str, Any]) -> tuple[float, float] | None:
         if not metadata.get("gps"):
             return None
 
@@ -202,7 +193,7 @@ class GeolocationService:
 
         return None
 
-    def add_location_to_metadata(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def add_location_to_metadata(self, metadata: dict[str, Any]) -> dict[str, Any]:
         if not self.enabled:
             return metadata
 
@@ -218,7 +209,7 @@ class GeolocationService:
 
         return metadata
 
-    def create_location_map(self, photos_with_location: list) -> Dict[str, list]:
+    def create_location_map(self, photos_with_location: list) -> dict[str, list]:
         location_map = {}
 
         for photo_info in photos_with_location:
@@ -264,9 +255,7 @@ class GeolocationService:
             if photo_info.get("gps"):
                 gps = photo_info["gps"]
                 name = Path(photo_info["file"]).name
-                description = photo_info.get("location", {}).get(
-                    "display_name", "No location info"
-                )
+                description = photo_info.get("location", {}).get("display_name", "No location info")
 
                 placemark = placemark_template.format(
                     name=name,

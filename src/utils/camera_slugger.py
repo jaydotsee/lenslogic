@@ -3,13 +3,12 @@ Camera name slugification utilities for professional photo organization
 """
 
 import re
-from typing import Dict, Optional
 
 
 class CameraSlugger:
     """Converts camera names to clean, consistent slugs for file organization"""
 
-    def __init__(self, custom_mappings: Optional[Dict[str, str]] = None):
+    def __init__(self, custom_mappings: dict[str, str] | None = None):
         """
         Initialize with optional custom mappings
 
@@ -142,7 +141,7 @@ class CameraSlugger:
 
         return slug or "unknown"
 
-    def get_examples(self) -> Dict[str, str]:
+    def get_examples(self) -> dict[str, str]:
         """Get examples of camera name to slug conversions"""
         examples = {
             # iPhone examples
@@ -175,7 +174,7 @@ class CameraSlugger:
 
         # Process examples through the actual slug creation
         processed_examples = {}
-        for full_name, expected in examples.items():
+        for full_name, _expected in examples.items():
             parts = full_name.split(" ", 1)
             make = parts[0] if len(parts) > 1 else ""
             model = parts[1] if len(parts) > 1 else parts[0]
@@ -188,7 +187,7 @@ class CameraSlugger:
 def get_camera_slug(
     camera_make: str = "",
     camera_model: str = "",
-    custom_mappings: Optional[Dict[str, str]] = None,
+    custom_mappings: dict[str, str] | None = None,
 ) -> str:
     """
     Convenience function to get a camera slug
