@@ -3,8 +3,10 @@
 LensLogic Demo - Shows functionality without requiring full dependencies
 """
 
+
 def show_ascii_logo():
-    print("""
+    print(
+        """
  ██▓    ▓█████  ███▄    █   ██████  ██▓     ▒█████    ▄████  ██▓ ▄████▄
 ▓██▒    ▓█   ▀  ██ ▀█   █ ▒██    ▒ ▓██▒    ▒██▒  ██▒ ██▒ ▀█▒▓██▒▒██▀ ▀█
 ▒██░    ▒███   ▓██  ▀█ ██▒░ ▓██▄   ▒██░    ▒██░  ██▒▒██░▄▄▄░▒██▒▒▓█    ▄
@@ -17,10 +19,13 @@ def show_ascii_logo():
                                                               ░
 
     Smart photo organization powered by metadata
-    """)
+    """
+    )
+
 
 def show_features():
-    print("""
+    print(
+        """
 🎯 LensLogic Features:
 
 📁 CORE ORGANIZATION:
@@ -113,7 +118,9 @@ def show_features():
    • Equipment usage tracking
    • Session-based organization
    • Quality assessment tools
-    """)
+    """
+    )
+
 
 def main():
     print("=" * 70)
@@ -122,7 +129,8 @@ def main():
     show_features()
     print("=" * 70)
 
-    print("""
+    print(
+        """
 🚀 Ready to get started?
 
 1. Install dependencies: pip install -r requirements.txt
@@ -130,7 +138,9 @@ def main():
 3. Start organizing: python src/main.py
 
 For help: python src/main.py --help
-    """)
+    """
+    )
+
 
 if __name__ == "__main__":
     main()

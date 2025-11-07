@@ -46,6 +46,7 @@ SIMPLE_LOGO = """
   └─────────────────────────────────────────┘
 """
 
+
 def print_logo(style="compact"):
     """Print LensLogic logo in specified style"""
     if style == "full":
@@ -59,6 +60,7 @@ def print_logo(style="compact"):
     else:
         print(LENSLOGIC_COMPACT)
 
+
 def get_version_info():
     """Get version and build information"""
     return """
@@ -66,6 +68,7 @@ def get_version_info():
     Build: Production
     License: MIT
     """
+
 
 def print_startup_banner():
     """Print startup banner with logo and version"""

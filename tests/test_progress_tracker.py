@@ -7,7 +7,7 @@ import os
 from unittest.mock import Mock, patch
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from utils.progress_tracker import ProgressTracker
 
@@ -31,63 +31,63 @@ class TestProgressTracker:
     def test_progress_tracker_has_console(self):
         """Test that ProgressTracker has console attribute"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'console')
+        assert hasattr(tracker, "console")
 
     def test_print_info_method_exists(self):
         """Test that print_info method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_info')
+        assert hasattr(tracker, "print_info")
         assert callable(tracker.print_info)
 
     def test_print_error_method_exists(self):
         """Test that print_error method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_error')
+        assert hasattr(tracker, "print_error")
         assert callable(tracker.print_error)
 
     def test_print_warning_method_exists(self):
         """Test that print_warning method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_warning')
+        assert hasattr(tracker, "print_warning")
         assert callable(tracker.print_warning)
 
     def test_print_success_method_exists(self):
         """Test that print_success method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_success')
+        assert hasattr(tracker, "print_success")
         assert callable(tracker.print_success)
 
     def test_print_dry_run_method_exists(self):
         """Test that print_dry_run method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_dry_run')
+        assert hasattr(tracker, "print_dry_run")
         assert callable(tracker.print_dry_run)
 
     def test_start_processing_method_exists(self):
         """Test that start_processing method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'start_processing')
+        assert hasattr(tracker, "start_processing")
         assert callable(tracker.start_processing)
 
     def test_stop_processing_method_exists(self):
         """Test that stop_processing method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'stop_processing')
+        assert hasattr(tracker, "stop_processing")
         assert callable(tracker.stop_processing)
 
     def test_file_processed_method_exists(self):
         """Test that file_processed method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'file_processed')
+        assert hasattr(tracker, "file_processed")
         assert callable(tracker.file_processed)
 
     def test_print_summary_method_exists(self):
         """Test that print_summary method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'print_summary')
+        assert hasattr(tracker, "print_summary")
         assert callable(tracker.print_summary)
 
-    @patch('utils.progress_tracker.Console')
+    @patch("utils.progress_tracker.Console")
     def test_print_info_calls_console(self, mock_console):
         """Test that print_info calls console.print"""
         mock_console_instance = Mock()
@@ -135,7 +135,7 @@ class TestProgressTracker:
     def test_update_file_method_exists(self):
         """Test that update_file method exists"""
         tracker = ProgressTracker()
-        assert hasattr(tracker, 'update_file')
+        assert hasattr(tracker, "update_file")
         assert callable(tracker.update_file)
 
     def test_update_file_basic(self):

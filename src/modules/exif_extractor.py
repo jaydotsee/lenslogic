@@ -20,12 +20,20 @@ class ExifExtractor:
             return self.cache[str(file_path_obj)]
 
         metadata = {
-            'file_path': str(file_path_obj),
-            'file_name': file_path_obj.name,
-            'file_size': file_path_obj.stat().st_size if file_path_obj.exists() else 0,
-            'file_extension': file_path_obj.suffix.lower(),
-            'file_modified': datetime.fromtimestamp(file_path_obj.stat().st_mtime) if file_path_obj.exists() else None,
-            'file_created': datetime.fromtimestamp(file_path_obj.stat().st_ctime) if file_path_obj.exists() else None,
+            "file_path": str(file_path_obj),
+            "file_name": file_path_obj.name,
+            "file_size": file_path_obj.stat().st_size if file_path_obj.exists() else 0,
+            "file_extension": file_path_obj.suffix.lower(),
+            "file_modified": (
+                datetime.fromtimestamp(file_path_obj.stat().st_mtime)
+                if file_path_obj.exists()
+                else None
+            ),
+            "file_created": (
+                datetime.fromtimestamp(file_path_obj.stat().st_ctime)
+                if file_path_obj.exists()
+                else None
+            ),
         }
 
         try:
@@ -35,7 +43,7 @@ class ExifExtractor:
 
                 gps_data = self._extract_gps_data(file_path_obj)
                 if gps_data:
-                    metadata['gps'] = gps_data
+                    metadata["gps"] = gps_data
 
                 additional_data = self._extract_additional_metadata(file_path_obj)
                 metadata.update(additional_data)
@@ -46,56 +54,81 @@ class ExifExtractor:
         return metadata
 
     def _is_supported_image(self, file_path: Path) -> bool:
-        supported_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff',
-                              '.tif', '.heic', '.heif', '.raw', '.cr2', '.cr3',
-                              '.nef', '.arw', '.orf', '.dng', '.raf', '.rw2',
-                              '.pef', '.srw', '.x3f'}
+        supported_extensions = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".tiff",
+            ".tif",
+            ".heic",
+            ".heif",
+            ".raw",
+            ".cr2",
+            ".cr3",
+            ".nef",
+            ".arw",
+            ".orf",
+            ".dng",
+            ".raf",
+            ".rw2",
+            ".pef",
+            ".srw",
+            ".x3f",
+        }
         return file_path.suffix.lower() in supported_extensions
 
     def _extract_exif_data(self, file_path: Path) -> Dict[str, Any]:
         exif_dict = {}
 
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 img = exif.Image(f)
 
                 if img.has_exif:
-                    if hasattr(img, 'datetime_original'):
-                        exif_dict['datetime_original'] = self._parse_datetime(img.datetime_original)
-                    if hasattr(img, 'datetime_digitized'):
-                        exif_dict['datetime_digitized'] = self._parse_datetime(img.datetime_digitized)
-                    if hasattr(img, 'datetime'):
-                        exif_dict['datetime'] = self._parse_datetime(img.datetime)
+                    if hasattr(img, "datetime_original"):
+                        exif_dict["datetime_original"] = self._parse_datetime(
+                            img.datetime_original
+                        )
+                    if hasattr(img, "datetime_digitized"):
+                        exif_dict["datetime_digitized"] = self._parse_datetime(
+                            img.datetime_digitized
+                        )
+                    if hasattr(img, "datetime"):
+                        exif_dict["datetime"] = self._parse_datetime(img.datetime)
 
-                    if hasattr(img, 'make'):
-                        exif_dict['camera_make'] = img.make
-                    if hasattr(img, 'model'):
-                        exif_dict['camera_model'] = img.model
-                    if hasattr(img, 'lens_make'):
-                        exif_dict['lens_make'] = img.lens_make
-                    if hasattr(img, 'lens_model'):
-                        exif_dict['lens_model'] = img.lens_model
+                    if hasattr(img, "make"):
+                        exif_dict["camera_make"] = img.make
+                    if hasattr(img, "model"):
+                        exif_dict["camera_model"] = img.model
+                    if hasattr(img, "lens_make"):
+                        exif_dict["lens_make"] = img.lens_make
+                    if hasattr(img, "lens_model"):
+                        exif_dict["lens_model"] = img.lens_model
 
-                    if hasattr(img, 'f_number'):
-                        exif_dict['f_number'] = img.f_number
-                    if hasattr(img, 'exposure_time'):
-                        exif_dict['exposure_time'] = img.exposure_time
-                    if hasattr(img, 'photographic_sensitivity'):
-                        exif_dict['iso'] = img.photographic_sensitivity
-                    if hasattr(img, 'focal_length'):
-                        exif_dict['focal_length'] = img.focal_length
+                    if hasattr(img, "f_number"):
+                        exif_dict["f_number"] = img.f_number
+                    if hasattr(img, "exposure_time"):
+                        exif_dict["exposure_time"] = img.exposure_time
+                    if hasattr(img, "photographic_sensitivity"):
+                        exif_dict["iso"] = img.photographic_sensitivity
+                    if hasattr(img, "focal_length"):
+                        exif_dict["focal_length"] = img.focal_length
 
-                    if hasattr(img, 'orientation'):
-                        exif_dict['orientation'] = img.orientation
-                    if hasattr(img, 'software'):
-                        exif_dict['software'] = img.software
-                    if hasattr(img, 'artist'):
-                        exif_dict['artist'] = img.artist
-                    if hasattr(img, 'copyright'):
-                        exif_dict['copyright'] = img.copyright
+                    if hasattr(img, "orientation"):
+                        exif_dict["orientation"] = img.orientation
+                    if hasattr(img, "software"):
+                        exif_dict["software"] = img.software
+                    if hasattr(img, "artist"):
+                        exif_dict["artist"] = img.artist
+                    if hasattr(img, "copyright"):
+                        exif_dict["copyright"] = img.copyright
 
         except Exception as e:
-            logger.debug(f"Could not extract EXIF with exif library from {file_path}: {e}")
+            logger.debug(
+                f"Could not extract EXIF with exif library from {file_path}: {e}"
+            )
 
             try:
                 image = Image.open(file_path)
@@ -105,36 +138,38 @@ class ExifExtractor:
                     for tag_id, value in exif_data.items():
                         tag = TAGS.get(tag_id, tag_id)
 
-                        if tag == 'DateTimeOriginal':
-                            exif_dict['datetime_original'] = self._parse_datetime(value)
-                        elif tag == 'DateTimeDigitized':
-                            exif_dict['datetime_digitized'] = self._parse_datetime(value)
-                        elif tag == 'DateTime':
-                            exif_dict['datetime'] = self._parse_datetime(value)
-                        elif tag == 'Make':
-                            exif_dict['camera_make'] = value
-                        elif tag == 'Model':
-                            exif_dict['camera_model'] = value
-                        elif tag == 'LensMake':
-                            exif_dict['lens_make'] = value
-                        elif tag == 'LensModel':
-                            exif_dict['lens_model'] = value
-                        elif tag == 'FNumber':
-                            exif_dict['f_number'] = value
-                        elif tag == 'ExposureTime':
-                            exif_dict['exposure_time'] = value
-                        elif tag == 'ISOSpeedRatings':
-                            exif_dict['iso'] = value
-                        elif tag == 'FocalLength':
-                            exif_dict['focal_length'] = value
-                        elif tag == 'Orientation':
-                            exif_dict['orientation'] = value
-                        elif tag == 'Software':
-                            exif_dict['software'] = value
-                        elif tag == 'Artist':
-                            exif_dict['artist'] = value
-                        elif tag == 'Copyright':
-                            exif_dict['copyright'] = value
+                        if tag == "DateTimeOriginal":
+                            exif_dict["datetime_original"] = self._parse_datetime(value)
+                        elif tag == "DateTimeDigitized":
+                            exif_dict["datetime_digitized"] = self._parse_datetime(
+                                value
+                            )
+                        elif tag == "DateTime":
+                            exif_dict["datetime"] = self._parse_datetime(value)
+                        elif tag == "Make":
+                            exif_dict["camera_make"] = value
+                        elif tag == "Model":
+                            exif_dict["camera_model"] = value
+                        elif tag == "LensMake":
+                            exif_dict["lens_make"] = value
+                        elif tag == "LensModel":
+                            exif_dict["lens_model"] = value
+                        elif tag == "FNumber":
+                            exif_dict["f_number"] = value
+                        elif tag == "ExposureTime":
+                            exif_dict["exposure_time"] = value
+                        elif tag == "ISOSpeedRatings":
+                            exif_dict["iso"] = value
+                        elif tag == "FocalLength":
+                            exif_dict["focal_length"] = value
+                        elif tag == "Orientation":
+                            exif_dict["orientation"] = value
+                        elif tag == "Software":
+                            exif_dict["software"] = value
+                        elif tag == "Artist":
+                            exif_dict["artist"] = value
+                        elif tag == "Copyright":
+                            exif_dict["copyright"] = value
 
                 image.close()
             except Exception as e2:
@@ -146,31 +181,45 @@ class ExifExtractor:
         gps_data = {}
 
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 img = exif.Image(f)
 
                 if img.has_exif:
-                    if hasattr(img, 'gps_latitude') and hasattr(img, 'gps_longitude'):
-                        lat = self._convert_gps_coordinates(img.gps_latitude,
-                                                          img.gps_latitude_ref if hasattr(img, 'gps_latitude_ref') else 'N')
-                        lon = self._convert_gps_coordinates(img.gps_longitude,
-                                                          img.gps_longitude_ref if hasattr(img, 'gps_longitude_ref') else 'E')
+                    if hasattr(img, "gps_latitude") and hasattr(img, "gps_longitude"):
+                        lat = self._convert_gps_coordinates(
+                            img.gps_latitude,
+                            (
+                                img.gps_latitude_ref
+                                if hasattr(img, "gps_latitude_ref")
+                                else "N"
+                            ),
+                        )
+                        lon = self._convert_gps_coordinates(
+                            img.gps_longitude,
+                            (
+                                img.gps_longitude_ref
+                                if hasattr(img, "gps_longitude_ref")
+                                else "E"
+                            ),
+                        )
 
                         if lat and lon:
-                            gps_data['latitude'] = lat
-                            gps_data['longitude'] = lon
+                            gps_data["latitude"] = lat
+                            gps_data["longitude"] = lon
 
-                    if hasattr(img, 'gps_altitude'):
-                        gps_data['altitude'] = img.gps_altitude
-                    if hasattr(img, 'gps_timestamp'):
-                        gps_data['timestamp'] = img.gps_timestamp
-                    if hasattr(img, 'gps_speed'):
-                        gps_data['speed'] = img.gps_speed
-                    if hasattr(img, 'gps_direction'):
-                        gps_data['direction'] = img.gps_direction
+                    if hasattr(img, "gps_altitude"):
+                        gps_data["altitude"] = img.gps_altitude
+                    if hasattr(img, "gps_timestamp"):
+                        gps_data["timestamp"] = img.gps_timestamp
+                    if hasattr(img, "gps_speed"):
+                        gps_data["speed"] = img.gps_speed
+                    if hasattr(img, "gps_direction"):
+                        gps_data["direction"] = img.gps_direction
 
         except Exception as e:
-            logger.debug(f"Could not extract GPS with exif library from {file_path}: {e}")
+            logger.debug(
+                f"Could not extract GPS with exif library from {file_path}: {e}"
+            )
 
             try:
                 image = Image.open(file_path)
@@ -180,34 +229,34 @@ class ExifExtractor:
                     for tag_id, value in exif_data.items():
                         tag = TAGS.get(tag_id, tag_id)
 
-                        if tag == 'GPSInfo':
+                        if tag == "GPSInfo":
                             gps_info = {}
                             for gps_tag_id, gps_value in value.items():
                                 gps_tag = GPSTAGS.get(gps_tag_id, gps_tag_id)
                                 gps_info[gps_tag] = gps_value
 
-                            if 'GPSLatitude' in gps_info and 'GPSLongitude' in gps_info:
+                            if "GPSLatitude" in gps_info and "GPSLongitude" in gps_info:
                                 lat = self._convert_gps_coordinates_pil(
-                                    gps_info['GPSLatitude'],
-                                    gps_info.get('GPSLatitudeRef', 'N')
+                                    gps_info["GPSLatitude"],
+                                    gps_info.get("GPSLatitudeRef", "N"),
                                 )
                                 lon = self._convert_gps_coordinates_pil(
-                                    gps_info['GPSLongitude'],
-                                    gps_info.get('GPSLongitudeRef', 'E')
+                                    gps_info["GPSLongitude"],
+                                    gps_info.get("GPSLongitudeRef", "E"),
                                 )
 
                                 if lat and lon:
-                                    gps_data['latitude'] = lat
-                                    gps_data['longitude'] = lon
+                                    gps_data["latitude"] = lat
+                                    gps_data["longitude"] = lon
 
-                            if 'GPSAltitude' in gps_info:
-                                gps_data['altitude'] = gps_info['GPSAltitude']
-                            if 'GPSTimeStamp' in gps_info:
-                                gps_data['timestamp'] = gps_info['GPSTimeStamp']
-                            if 'GPSSpeed' in gps_info:
-                                gps_data['speed'] = gps_info['GPSSpeed']
-                            if 'GPSImgDirection' in gps_info:
-                                gps_data['direction'] = gps_info['GPSImgDirection']
+                            if "GPSAltitude" in gps_info:
+                                gps_data["altitude"] = gps_info["GPSAltitude"]
+                            if "GPSTimeStamp" in gps_info:
+                                gps_data["timestamp"] = gps_info["GPSTimeStamp"]
+                            if "GPSSpeed" in gps_info:
+                                gps_data["speed"] = gps_info["GPSSpeed"]
+                            if "GPSImgDirection" in gps_info:
+                                gps_data["direction"] = gps_info["GPSImgDirection"]
 
                 image.close()
             except Exception as e2:
@@ -220,17 +269,17 @@ class ExifExtractor:
 
         try:
             image = Image.open(file_path)
-            metadata['width'] = image.width
-            metadata['height'] = image.height
-            metadata['mode'] = image.mode
-            metadata['format'] = image.format
+            metadata["width"] = image.width
+            metadata["height"] = image.height
+            metadata["mode"] = image.mode
+            metadata["format"] = image.format
 
-            if hasattr(image, 'info'):
+            if hasattr(image, "info"):
                 info = image.info
-                if 'dpi' in info:
-                    metadata['dpi'] = info['dpi']
-                if 'compression' in info:
-                    metadata['compression'] = info['compression']
+                if "dpi" in info:
+                    metadata["dpi"] = info["dpi"]
+                if "compression" in info:
+                    metadata["compression"] = info["compression"]
 
             image.close()
         except Exception as e:
@@ -243,13 +292,13 @@ class ExifExtractor:
             return None
 
         formats = [
-            '%Y:%m:%d %H:%M:%S',
-            '%Y-%m-%d %H:%M:%S',
-            '%Y/%m/%d %H:%M:%S',
-            '%Y:%m:%d %H:%M:%S.%f',
-            '%Y-%m-%dT%H:%M:%S',
-            '%Y-%m-%dT%H:%M:%S.%f',
-            '%Y-%m-%dT%H:%M:%SZ',
+            "%Y:%m:%d %H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y/%m/%d %H:%M:%S",
+            "%Y:%m:%d %H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%SZ",
         ]
 
         for fmt in formats:
@@ -272,7 +321,7 @@ class ExifExtractor:
 
             decimal = degrees + minutes / 60 + seconds / 3600
 
-            if ref in ['S', 'W']:
+            if ref in ["S", "W"]:
                 decimal = -decimal
 
             return decimal
@@ -280,7 +329,9 @@ class ExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def _convert_gps_coordinates_pil(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
+    def _convert_gps_coordinates_pil(
+        self, coord_tuple: Tuple, ref: str
+    ) -> Optional[float]:
         try:
             degrees = coord_tuple[0]
             minutes = coord_tuple[1]
@@ -295,7 +346,7 @@ class ExifExtractor:
 
             decimal = float(degrees) + float(minutes) / 60 + float(seconds) / 3600
 
-            if ref in ['S', 'W']:
+            if ref in ["S", "W"]:
                 decimal = -decimal
 
             return decimal
@@ -305,11 +356,11 @@ class ExifExtractor:
 
     def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         date_sources = [
-            'datetime_original',
-            'datetime_digitized',
-            'datetime',
-            'file_modified',
-            'file_created'
+            "datetime_original",
+            "datetime_digitized",
+            "datetime",
+            "file_modified",
+            "file_created",
         ]
 
         for source in date_sources:

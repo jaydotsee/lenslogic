@@ -6,7 +6,7 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
 class TestBasicFunctionality:
@@ -33,7 +33,7 @@ class TestBasicFunctionality:
 
         manager = ConfigManager()
         assert manager is not None
-        assert hasattr(manager, 'config')
+        assert hasattr(manager, "config")
         assert isinstance(manager.config, dict)
 
     def test_progress_tracker_basic(self):
@@ -42,7 +42,7 @@ class TestBasicFunctionality:
 
         tracker = ProgressTracker()
         assert tracker is not None
-        assert hasattr(tracker, 'console')
+        assert hasattr(tracker, "console")
 
     def test_camera_slugger_basic(self):
         """Test basic CameraSlugger functionality"""
@@ -83,27 +83,27 @@ class TestBasicFunctionality:
 
     def test_dict_operations(self):
         """Test basic dictionary operations"""
-        test_dict = {'a': 1, 'b': 2, 'c': 3}
+        test_dict = {"a": 1, "b": 2, "c": 3}
         assert len(test_dict) == 3
-        assert test_dict['a'] == 1
-        assert 'b' in test_dict
+        assert test_dict["a"] == 1
+        assert "b" in test_dict
 
     def test_config_structure_validation(self):
         """Test that we can validate basic config structure"""
         sample_config = {
-            'general': {
-                'source_directory': '.',
-                'destination_directory': './organized'
+            "general": {
+                "source_directory": ".",
+                "destination_directory": "./organized",
             },
-            'file_types': {
-                'images': ['jpg', 'jpeg'],
-                'raw': ['cr2', 'nef'],
-                'videos': ['mp4', 'mov']
-            }
+            "file_types": {
+                "images": ["jpg", "jpeg"],
+                "raw": ["cr2", "nef"],
+                "videos": ["mp4", "mov"],
+            },
         }
 
         # Basic structure validation
-        assert 'general' in sample_config
-        assert 'file_types' in sample_config
-        assert isinstance(sample_config['file_types']['images'], list)
-        assert len(sample_config['file_types']['images']) > 0
+        assert "general" in sample_config
+        assert "file_types" in sample_config
+        assert isinstance(sample_config["file_types"]["images"], list)
+        assert len(sample_config["file_types"]["images"]) > 0
