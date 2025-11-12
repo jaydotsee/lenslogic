@@ -2,13 +2,13 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class FolderOrganizer:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.org_config = config.get("organization", {})
         self.folder_structure = self.org_config.get("folder_structure", "{year}/{month:02d}/{day:02d}")
@@ -34,9 +34,9 @@ class FolderOrganizer:
     def determine_destination_path(
         self,
         file_path: str,
-        metadata: dict[str, Any],
+        metadata: Dict[str, Any],
         base_destination: str,
-        location_info: dict[str, str] | None = None,
+        location_info: Optional[Dict[str, str]] = None,
     ) -> Path:
         file_path_obj = Path(file_path)
         extension = file_path_obj.suffix.lower()
@@ -59,7 +59,7 @@ class FolderOrganizer:
 
         return destination
 
-    def _get_datetime_from_metadata(self, metadata: dict[str, Any]) -> datetime | None:
+    def _get_datetime_from_metadata(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         date_sources = self.org_config.get(
             "date_sources",
             [
@@ -86,8 +86,8 @@ class FolderOrganizer:
     def _format_folder_structure(
         self,
         capture_datetime: datetime,
-        metadata: dict[str, Any],
-        location_info: dict[str, str] | None = None,
+        metadata: Dict[str, Any],
+        location_info: Optional[Dict[str, str]] = None,
     ) -> str:
         variables = {
             "year": capture_datetime.year,
@@ -137,7 +137,7 @@ class FolderOrganizer:
             logger.error(f"Error formatting folder structure: {e}")
             return f"{variables['year']}/{variables['month']:02d}/{variables['day']:02d}"
 
-    def _prepare_location_variables(self, location_info: dict[str, str]) -> dict[str, str]:
+    def _prepare_location_variables(self, location_info: Dict[str, str]) -> Dict[str, str]:
         """Prepare location variables based on configuration"""
         result = {}
 
@@ -185,7 +185,7 @@ class FolderOrganizer:
 
         return result
 
-    def _determine_file_type_folder(self, extension: str) -> str | None:
+    def _determine_file_type_folder(self, extension: str) -> Optional[str]:
         if not self.separate_raw:
             return None
 
@@ -223,7 +223,7 @@ class FolderOrganizer:
         new_filename: str,
         dry_run: bool = False,
         preserve_original: bool = True,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         source = Path(source_path)
         destination = destination_folder / new_filename
 
@@ -304,7 +304,7 @@ class FolderOrganizer:
         self,
         source_path: str,
         destination_path: str,
-        metadata: dict[str, Any],
+        metadata: Dict[str, Any],
         dry_run: bool = False,
     ) -> bool:
         if dry_run:
@@ -326,7 +326,7 @@ class FolderOrganizer:
             logger.error(f"Error creating sidecar files: {e}")
             return False
 
-    def _generate_xmp_content(self, metadata: dict[str, Any]) -> str:
+    def _generate_xmp_content(self, metadata: Dict[str, Any]) -> str:
         xmp_template = """<?xml version="1.0" encoding="UTF-8"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -633,7 +633,7 @@ class FolderOrganizer:
             .replace("'", "&#39;")
         )
 
-    def get_statistics(self, source_directory: str) -> dict[str, Any]:
+    def get_statistics(self, source_directory: str) -> Dict[str, Any]:
         source_path = Path(source_directory)
 
         if not source_path.exists():

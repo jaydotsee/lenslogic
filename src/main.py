@@ -4,7 +4,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from modules.backup_manager import BackupManager
 from modules.config_wizard import ConfigurationWizard
@@ -24,7 +24,7 @@ from utils.progress_tracker import ProgressTracker
 
 
 class LensLogic:
-    def __init__(self, config_path: str | None = None, args: dict[str, Any] | None = None):
+    def __init__(self, config_path: Optional[str] = None, args: Optional[Dict[str, Any]] = None):
         self.config_manager = ConfigManager(config_path)
 
         # Store custom destination separately - don't save to config
@@ -68,7 +68,7 @@ class LensLogic:
             ],
         )
 
-    def organize_photos(self, dry_run: bool = False, custom_destination: str | None = None):
+    def organize_photos(self, dry_run: bool = False, custom_destination: Optional[str] = None):
         source_dir = Path(self.config.get("general", {}).get("source_directory", "."))
 
         # Use custom destination if provided, or class custom_destination, otherwise use config destination
@@ -200,7 +200,7 @@ class LensLogic:
 
         return success_count > 0
 
-    def _collect_files(self, source_dir: Path) -> list[Path]:
+    def _collect_files(self, source_dir: Path) -> List[Path]:
         files = []
 
         all_extensions = set()
@@ -230,7 +230,7 @@ class LensLogic:
             for ext, count in sorted(stats["file_types"].items(), key=lambda x: x[1], reverse=True)[:10]:
                 self.progress_tracker.console.print(f"  {ext}: {count} files")
 
-    def export_gps_locations(self, output_path: str | None = None):
+    def export_gps_locations(self, output_path: Optional[str] = None):
         if not output_path:
             output_path = "photo_locations.kml"
 
@@ -348,7 +348,7 @@ class LensLogic:
                 self.progress_tracker.print_info("Goodbye!")
                 break
 
-    def generate_advanced_statistics(self, output_dir: str | None = None):
+    def generate_advanced_statistics(self, output_dir: Optional[str] = None):
         """Generate comprehensive statistics with charts"""
         source_dir = self.config.get("general", {}).get("source_directory", ".")
         files = self._collect_files(Path(source_dir))
@@ -462,7 +462,7 @@ class LensLogic:
                 f"Organized {result['files_organized']} files into {result['sessions_processed']} session folders"
             )
 
-    def optimize_for_social_media(self, platform: str, format_type: str = "post", output_dir: str | None = None):
+    def optimize_for_social_media(self, platform: str, format_type: str = "post", output_dir: Optional[str] = None):
         """Optimize photos for social media platforms"""
         source_dir = self.config.get("general", {}).get("source_directory", ".")
         files = self._collect_files(Path(source_dir))
@@ -502,7 +502,7 @@ class LensLogic:
             output_path = Path(results[0]["output_path"]).parent
             self.progress_tracker.print_info(f"Optimized images saved to: {output_path}")
 
-    def backup_photos(self, destinations: list[str] | None = None, verify: bool = True):
+    def backup_photos(self, destinations: Optional[List[str]] = None, verify: bool = True):
         """Backup organized photos to specified destinations"""
         # Backup the organized photos (destination directory), not the source directory
         source_dir = self.config.get("general", {}).get("destination_directory", "./organized")
@@ -567,7 +567,7 @@ class LensLogic:
         else:
             self.progress_tracker.print_info("Configuration wizard cancelled or failed")
 
-    def analyze_xmp_library(self, library_path: str | None = None, output_dir: str | None = None):
+    def analyze_xmp_library(self, library_path: Optional[str] = None, output_dir: Optional[str] = None):
         """Analyze photo library using XMP sidecar files"""
         if not library_path:
             library_path = self.config.get("general", {}).get("source_directory", ".")

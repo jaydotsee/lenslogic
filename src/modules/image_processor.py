@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from PIL import Image, ImageEnhance
 from PIL.Image import Resampling, Transpose
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ImageProcessor:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.processing_config = config.get("image_processing", {})
         self.auto_rotate = self.processing_config.get("auto_rotate", True)
@@ -20,10 +20,10 @@ class ImageProcessor:
     def process_image(
         self,
         image_path: str,
-        metadata: dict[str, Any],
-        output_path: str | None = None,
+        metadata: Dict[str, Any],
+        output_path: Optional[str] = None,
         dry_run: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Process image with auto-rotation and optional enhancements"""
         result = {
             "original_path": image_path,
@@ -87,7 +87,7 @@ class ImageProcessor:
 
         return result
 
-    def _auto_rotate_image(self, img: Image.Image, metadata: dict[str, Any]) -> Image.Image:
+    def _auto_rotate_image(self, img: Image.Image, metadata: Dict[str, Any]) -> Image.Image:
         """Auto-rotate image based on EXIF orientation"""
         orientation = metadata.get("orientation")
 
@@ -144,7 +144,7 @@ class ImageProcessor:
             logger.debug(f"Error in auto-enhancement: {e}")
             return img
 
-    def _generate_thumbnails(self, img: Image.Image, original_path: str, output_base_path: str) -> list[str]:
+    def _generate_thumbnails(self, img: Image.Image, original_path: str, output_base_path: str) -> List[str]:
         """Generate thumbnails in multiple sizes"""
         thumbnails = []
         base_path = Path(output_base_path)
@@ -173,7 +173,7 @@ class ImageProcessor:
 
         return thumbnails
 
-    def _needs_processing(self, metadata: dict[str, Any]) -> bool:
+    def _needs_processing(self, metadata: Dict[str, Any]) -> bool:
         """Check if image needs processing based on metadata"""
         needs_rotation = False
 
@@ -183,7 +183,7 @@ class ImageProcessor:
 
         return needs_rotation or self.auto_enhance or self.generate_thumbnails
 
-    def get_social_media_specs(self, platform: str) -> dict[str, Any]:
+    def get_social_media_specs(self, platform: str) -> Dict[str, Any]:
         """Get platform-specific image specifications"""
         specs = {
             "instagram": {
@@ -216,9 +216,9 @@ class ImageProcessor:
         image_path: str,
         platform: str,
         format_type: str = "post",
-        output_dir: str = None,
+        output_dir: Optional[str] = None,
         dry_run: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Optimize image for specific social media platform"""
         result = {
             "original_path": image_path,
@@ -302,12 +302,12 @@ class ImageProcessor:
 
     def batch_optimize_for_social_media(
         self,
-        image_paths: list[str],
+        image_paths: List[str],
         platform: str,
         format_type: str = "post",
-        output_dir: str = None,
+        output_dir: Optional[str] = None,
         dry_run: bool = False,
-    ) -> list[dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
         """Batch optimize multiple images for social media"""
         results = []
 

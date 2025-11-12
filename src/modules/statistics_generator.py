@@ -2,7 +2,7 @@ import logging
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class StatisticsGenerator:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.stats_config = config.get("statistics", {})
         self.console = Console()
         self.enable_charts = self.stats_config.get("enable_charts", True)
         self.chart_output_dir = self.stats_config.get("chart_output_dir", "charts")
 
-    def generate_library_statistics(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def generate_library_statistics(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate comprehensive statistics for the photo library"""
         if not photos_metadata:
             return {"error": "No photos provided for analysis"}
@@ -39,7 +39,7 @@ class StatisticsGenerator:
 
         return stats
 
-    def _calculate_date_range(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _calculate_date_range(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Calculate date range of photos"""
         dates = []
         for photo in photos_metadata:
@@ -61,7 +61,7 @@ class StatisticsGenerator:
             "total_photos_with_dates": len(dates),
         }
 
-    def _analyze_cameras(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_cameras(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze camera usage statistics"""
         camera_counts = Counter()
         camera_models = Counter()
@@ -86,7 +86,7 @@ class StatisticsGenerator:
             "model_distribution": dict(camera_models.most_common()),
         }
 
-    def _analyze_lenses(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_lenses(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze lens usage statistics"""
         lens_counts = Counter()
         focal_lengths = []
@@ -97,7 +97,7 @@ class StatisticsGenerator:
                 lens_counts[lens] += 1
 
             focal_length = photo.get("focal_length")
-            if focal_length and isinstance(focal_length, int | float):
+            if focal_length and isinstance(focal_length, (int, float)):
                 focal_lengths.append(focal_length)
 
         focal_length_stats = {}
@@ -117,7 +117,7 @@ class StatisticsGenerator:
             "focal_length_stats": focal_length_stats,
         }
 
-    def _analyze_technical_settings(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_technical_settings(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze camera technical settings"""
         iso_values = []
         aperture_values = []
@@ -125,15 +125,15 @@ class StatisticsGenerator:
 
         for photo in photos_metadata:
             iso = photo.get("iso")
-            if iso and isinstance(iso, int | float):
+            if iso and isinstance(iso, (int, float)):
                 iso_values.append(iso)
 
             f_number = photo.get("f_number")
-            if f_number and isinstance(f_number, int | float):
+            if f_number and isinstance(f_number, (int, float)):
                 aperture_values.append(f_number)
 
             exposure = photo.get("exposure_time")
-            if exposure and isinstance(exposure, int | float):
+            if exposure and isinstance(exposure, (int, float)):
                 shutter_speeds.append(exposure)
 
         stats = {}
@@ -166,7 +166,7 @@ class StatisticsGenerator:
 
         return stats
 
-    def _analyze_file_info(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_file_info(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze file information"""
         file_sizes = []
         extensions = Counter()
@@ -174,7 +174,7 @@ class StatisticsGenerator:
 
         for photo in photos_metadata:
             size = photo.get("file_size")
-            if size and isinstance(size, int | float):
+            if size and isinstance(size, (int, float)):
                 file_sizes.append(size)
 
             ext = photo.get("file_extension", "").lower()
@@ -209,7 +209,7 @@ class StatisticsGenerator:
 
         return stats
 
-    def _analyze_locations(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_locations(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze location information"""
         locations = Counter()
         countries = Counter()
@@ -245,7 +245,7 @@ class StatisticsGenerator:
             "cities_visited": dict(cities.most_common(10)),
         }
 
-    def _analyze_shooting_patterns(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_shooting_patterns(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze shooting patterns over time"""
         photos_by_month = defaultdict(int)
         photos_by_hour = defaultdict(int)
@@ -268,7 +268,7 @@ class StatisticsGenerator:
             "most_active_weekday": (max(photos_by_weekday.items(), key=lambda x: x[1]) if photos_by_weekday else None),
         }
 
-    def _analyze_quality_metrics(self, photos_metadata: list[dict[str, Any]]) -> dict[str, Any]:
+    def _analyze_quality_metrics(self, photos_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze image quality metrics"""
         # This is a placeholder for quality analysis
         # In a real implementation, you might analyze:
@@ -282,7 +282,7 @@ class StatisticsGenerator:
             "available_metrics": [],
         }
 
-    def _get_photo_date(self, photo: dict[str, Any]) -> datetime | None:
+    def _get_photo_date(self, photo: Dict[str, Any]) -> Optional[datetime]:
         """Extract photo date from metadata"""
         date_fields = [
             "datetime_original",
@@ -303,7 +303,7 @@ class StatisticsGenerator:
 
         return None
 
-    def display_statistics(self, stats: dict[str, Any]) -> None:
+    def display_statistics(self, stats: Dict[str, Any]) -> None:
         """Display statistics in a formatted console output"""
         self.console.print("\n[bold cyan]📊 LensLogic Library Statistics[/bold cyan]\n")
 
@@ -407,7 +407,7 @@ class StatisticsGenerator:
 
                 self.console.print(location_table)
 
-    def generate_charts(self, stats: dict[str, Any], output_dir: str = None) -> list[str]:
+    def generate_charts(self, stats: Dict[str, Any], output_dir: Optional[str] = None) -> List[str]:
         """Generate statistical charts"""
         if not self.enable_charts:
             return []
@@ -444,7 +444,7 @@ class StatisticsGenerator:
 
         return charts_created
 
-    def _create_shooting_patterns_chart(self, patterns: dict[str, Any], output_path: Path) -> str | None:
+    def _create_shooting_patterns_chart(self, patterns: Dict[str, Any], output_path: Path) -> Optional[str]:
         """Create shooting patterns chart"""
         try:
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
@@ -482,7 +482,7 @@ class StatisticsGenerator:
             logger.error(f"Error creating shooting patterns chart: {e}")
             return None
 
-    def _create_camera_usage_chart(self, camera_stats: dict[str, Any], output_path: Path) -> str | None:
+    def _create_camera_usage_chart(self, camera_stats: Dict[str, Any], output_path: Path) -> Optional[str]:
         """Create camera usage pie chart"""
         try:
             if not camera_stats.get("camera_distribution"):
@@ -506,7 +506,7 @@ class StatisticsGenerator:
             logger.error(f"Error creating camera usage chart: {e}")
             return None
 
-    def _create_technical_settings_chart(self, tech_stats: dict[str, Any], output_path: Path) -> str | None:
+    def _create_technical_settings_chart(self, tech_stats: Dict[str, Any], output_path: Path) -> Optional[str]:
         """Create technical settings distribution chart"""
         try:
             fig, axes = plt.subplots(1, 3, figsize=(18, 6))

@@ -3,7 +3,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class GeolocationService:
-    def __init__(self, config: dict[str, Any], cache_dir: str | None = None):
+    def __init__(self, config: Dict[str, Any], cache_dir: Optional[str] = None):
         self.config = config.get("geolocation", {})
         self.enabled = self.config.get("enabled", True)
         self.reverse_geocode = self.config.get("reverse_geocode", True)
@@ -34,7 +34,7 @@ class GeolocationService:
         self.last_request_time = 0
         self.min_delay = 1.0
 
-    def _load_cache(self) -> dict[str, Any]:
+    def _load_cache(self) -> Dict[str, Any]:
         if not self.cache_lookups or not self.cache_file.exists():
             return {}
 
@@ -55,7 +55,7 @@ class GeolocationService:
         except Exception as e:
             logger.warning(f"Could not save geocache: {e}")
 
-    def get_location_info(self, latitude: float, longitude: float) -> dict[str, str] | None:
+    def get_location_info(self, latitude: float, longitude: float) -> Optional[Dict[str, str]]:
         if not self.enabled or not self.reverse_geocode:
             return None
 
@@ -80,7 +80,7 @@ class GeolocationService:
         key_string = f"{rounded_lat}:{rounded_lon}"
         return hashlib.md5(key_string.encode()).hexdigest()
 
-    def _reverse_geocode(self, latitude: float, longitude: float) -> dict[str, str] | None:
+    def _reverse_geocode(self, latitude: float, longitude: float) -> Optional[Dict[str, str]]:
         current_time = time.time()
         elapsed = current_time - self.last_request_time
 
@@ -138,7 +138,7 @@ class GeolocationService:
 
         return text[:50]
 
-    def _create_display_name(self, location_info: dict[str, str]) -> str:
+    def _create_display_name(self, location_info: Dict[str, str]) -> str:
         parts = []
 
         if location_info.get("city"):
@@ -154,7 +154,7 @@ class GeolocationService:
 
         return ", ".join(parts) if parts else "Unknown Location"
 
-    def format_location_folder(self, location_info: dict[str, str]) -> str:
+    def format_location_folder(self, location_info: Dict[str, str]) -> str:
         if not location_info or not self.add_location_to_folder:
             return ""
 
@@ -172,7 +172,7 @@ class GeolocationService:
             logger.error(f"Error formatting location folder: {e}")
             return ""
 
-    def extract_gps_from_metadata(self, metadata: dict[str, Any]) -> tuple[float, float] | None:
+    def extract_gps_from_metadata(self, metadata: Dict[str, Any]) -> Optional[Tuple[float, float]]:
         if not metadata.get("gps"):
             return None
 
@@ -193,7 +193,7 @@ class GeolocationService:
 
         return None
 
-    def add_location_to_metadata(self, metadata: dict[str, Any]) -> dict[str, Any]:
+    def add_location_to_metadata(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
         if not self.enabled:
             return metadata
 
@@ -209,7 +209,7 @@ class GeolocationService:
 
         return metadata
 
-    def create_location_map(self, photos_with_location: list) -> dict[str, list]:
+    def create_location_map(self, photos_with_location: List) -> Dict[str, List]:
         location_map = {}
 
         for photo_info in photos_with_location:
@@ -231,7 +231,7 @@ class GeolocationService:
 
         return location_map
 
-    def export_kml(self, photos_with_location: list, output_path: str):
+    def export_kml(self, photos_with_location: List, output_path: str):
         kml_template = """<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>

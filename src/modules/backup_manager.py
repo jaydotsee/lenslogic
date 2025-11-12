@@ -5,7 +5,7 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from send2trash import send2trash
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class BackupManager:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.backup_config = config.get("backup", {})
         self.verification_enabled = self.backup_config.get("enable_verification", True)
@@ -24,7 +24,7 @@ class BackupManager:
 
         self.checksum_cache = self._load_checksum_cache()
 
-    def _load_checksum_cache(self) -> dict[str, dict[str, Any]]:
+    def _load_checksum_cache(self) -> Dict[str, Dict[str, Any]]:
         """Load checksum cache from file"""
         try:
             if Path(self.checksum_cache_file).exists():
@@ -43,7 +43,7 @@ class BackupManager:
         except Exception as e:
             logger.warning(f"Could not save checksum cache: {e}")
 
-    def calculate_file_checksum(self, file_path: str, algorithm: str = "sha256") -> str | None:
+    def calculate_file_checksum(self, file_path: str, algorithm: str = "sha256") -> Optional[str]:
         """Calculate checksum for a file"""
         file_path_obj = Path(file_path)
 
@@ -84,7 +84,7 @@ class BackupManager:
             logger.error(f"Error calculating checksum for {file_path_obj}: {e}")
             return None
 
-    def verify_backup(self, source_dir: str, backup_dir: str, quick_mode: bool = False) -> dict[str, Any]:
+    def verify_backup(self, source_dir: str, backup_dir: str, quick_mode: bool = False) -> Dict[str, Any]:
         """Verify backup integrity against source"""
         source_path = Path(source_dir)
         backup_path = Path(backup_dir)
@@ -158,7 +158,7 @@ class BackupManager:
 
         return result
 
-    def _get_file_list(self, directory: Path) -> list[Path]:
+    def _get_file_list(self, directory: Path) -> List[Path]:
         """Get list of all files in directory, excluding patterns"""
         files = []
 
@@ -205,7 +205,7 @@ class BackupManager:
         except Exception:
             return False
 
-    def incremental_sync(self, source_dir: str, destination_dirs: list[str], dry_run: bool = False) -> dict[str, Any]:
+    def incremental_sync(self, source_dir: str, destination_dirs: List[str], dry_run: bool = False) -> Dict[str, Any]:
         """Perform incremental sync to multiple destinations"""
         source_path = Path(source_dir)
 
@@ -280,8 +280,8 @@ class BackupManager:
         return result
 
     def _sync_to_destination(
-        self, source_path: Path, source_index: dict, dest_dir: str, dry_run: bool
-    ) -> dict[str, Any]:
+        self, source_path: Path, source_index: Dict, dest_dir: str, dry_run: bool
+    ) -> Dict[str, Any]:
         """Sync source to a single destination"""
         dest_path = Path(dest_dir)
 
@@ -360,7 +360,7 @@ class BackupManager:
 
         return result
 
-    def _needs_update(self, source_info: dict, dest_info: dict) -> bool:
+    def _needs_update(self, source_info: Dict, dest_info: Dict) -> bool:
         """Check if destination file needs updating"""
         # Check size first (quick)
         if source_info["size"] != dest_info["size"]:
@@ -384,7 +384,7 @@ class BackupManager:
             logger.error(f"Error copying {source_path} to {dest_path}: {e}")
             return False
 
-    def get_backup_status(self, source_dir: str, backup_dirs: list[str]) -> dict[str, Any]:
+    def get_backup_status(self, source_dir: str, backup_dirs: List[str]) -> Dict[str, Any]:
         """Get status of all configured backups"""
         status = {
             "source_directory": source_dir,
@@ -454,7 +454,7 @@ class BackupManager:
 
         return status
 
-    def cleanup_old_backups(self, backup_dir: str, keep_days: int = 30, dry_run: bool = False) -> dict[str, Any]:
+    def cleanup_old_backups(self, backup_dir: str, keep_days: int = 30, dry_run: bool = False) -> Dict[str, Any]:
         """Clean up old backup files"""
         backup_path = Path(backup_dir)
 
@@ -501,11 +501,11 @@ class BackupManager:
         self,
         backup_dir: str,
         restore_dir: str,
-        file_patterns: list[str] | None = None,
+        file_patterns: Optional[List[str]] = None,
         preserve_structure: bool = True,
         overwrite_newer: bool = True,
         dry_run: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Restore files from backup to specified directory"""
         backup_path = Path(backup_dir)
         restore_path = Path(restore_dir)
@@ -590,7 +590,7 @@ class BackupManager:
         result["restore_time"] = time.time() - start_time
         return result
 
-    def list_backup_contents(self, backup_dir: str, show_details: bool = False) -> dict[str, Any]:
+    def list_backup_contents(self, backup_dir: str, show_details: bool = False) -> Dict[str, Any]:
         """List contents of a backup directory with optional details"""
         backup_path = Path(backup_dir)
 
@@ -648,7 +648,7 @@ class BackupManager:
 
         return result
 
-    def get_restore_candidates(self, backup_dirs: list[str]) -> dict[str, Any]:
+    def get_restore_candidates(self, backup_dirs: List[str]) -> Dict[str, Any]:
         """Get information about available restore sources"""
         candidates = {
             "available_backups": [],
