@@ -90,26 +90,37 @@ jobs:
           dist/${{ matrix.asset_name }}.*
         generate_release_notes: false
         body: |
-          ## LensLogic v1.0.1 - Enhanced Interactive UI and XMP Sidecar Options
+          ## LensLogic v1.0.2 - Code Quality Improvements and Original Sequence Support
 
           ### New Features
-          - **Enhanced Interactive Mode**: Professional branding with full ASCII logo integration
-          - **XMP Sidecar File Options**: Control XMP metadata file creation with `--create-xmp` and `--no-xmp` flags
-          - **Visual Menu Organization**: Categorized panels (Quick Actions, Configuration, Analysis & Tools)
-          - **Configuration Status Tracking**: Status indicators and progress bars for setup completeness
+          - **Original Sequence Variable**: New `{original_sequence}` variable for naming patterns and folder structures
+            - Extracts and preserves original sequence numbers from filenames
+            - Maintains consistent numbering when organizing files
+            - Documented in README, API Reference, and User Guide
+          - **Development Environment Enhancements**: Added direnv and uv support for improved development workflow
+            - `.envrc` for automatic virtual environment activation
+            - `.uvenv` with PYTHONPATH configuration
+            - `uv.lock` for reproducible dependency management
 
-          ### UI Improvements
-          - Professional header with full logo and version information
-          - Color-coded status indicators (🟢🟡🔴) for configuration completeness
-          - Enhanced visual hierarchy with Rich panels and columns
-          - Better menu organization with helpful tips and context
-          - Improved configuration display with progress tracking
+          ### Code Quality Improvements
+          - **Ruff Linting**: Enhanced Ruff configuration with stricter rules
+            - Added pycodestyle, pyflakes, isort, pep8-naming, pyupgrade, and flake8-bugbear checks
+            - Configured formatting with consistent quote style and indentation
+            - Line length standardized to 120 characters
+          - **Pre-commit Hooks**: Integrated pre-commit framework for automated code quality checks
+            - Automatic formatting and linting before commits
+            - Ensures consistent code style across contributions
+          - **PyInstaller Improvements**: Optimized build process with custom spec file and clean builds
 
-          ### Configuration Enhancements
-          - New Feature Settings section in interactive mode for XMP sidecar toggle
-          - Updated configuration summary to include XMP file creation status
-          - CLI argument processing for XMP options
-          - Enhanced help documentation
+          ### Bug Fixes
+          - Fixed formatting issues in InteractiveMenu module
+          - Updated main.py with latest improvements
+          - Improved file permission handling
+
+          ### Documentation
+          - Updated configuration documentation with `{original_sequence}` examples
+          - Enhanced API reference with new FileRenamer methods
+          - Improved user guide with sequence extraction usage
 
           ### Downloads
           - **Windows**: `lenslogic-windows-x64.zip`
