@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigManager:
-    def __init__(self, config_path: str | None = None):
+    def __init__(self, config_path: Optional[str] = None):
         self.config_path = config_path
-        self.config: dict[str, Any] = {}
+        self.config: Dict[str, Any] = {}
         self.default_config_path = Path(__file__).parent.parent.parent / "config" / "default_config.yaml"
         self.user_config_path = Path.home() / ".lenslogic" / "config.yaml"
         self.load_config()
@@ -27,7 +27,7 @@ class ConfigManager:
             if custom_config:
                 self.config = self._merge_configs(self.config, custom_config)
 
-    def _load_default_config(self) -> dict[str, Any]:
+    def _load_default_config(self) -> Dict[str, Any]:
         try:
             with open(self.default_config_path) as f:
                 return yaml.safe_load(f) or {}
@@ -38,7 +38,7 @@ class ConfigManager:
             logger.error(f"Error parsing default config: {e}")
             return self._get_hardcoded_defaults()
 
-    def _load_user_config(self) -> dict[str, Any] | None:
+    def _load_user_config(self) -> Optional[Dict[str, Any]]:
         if not self.user_config_path.exists():
             return None
 
@@ -49,7 +49,7 @@ class ConfigManager:
             logger.error(f"Error parsing user config: {e}")
             return None
 
-    def _load_custom_config(self) -> dict[str, Any] | None:
+    def _load_custom_config(self) -> Optional[Dict[str, Any]]:
         if not self.config_path or not Path(self.config_path).exists():
             return None
 
@@ -60,7 +60,7 @@ class ConfigManager:
             logger.error(f"Error parsing custom config: {e}")
             return None
 
-    def _merge_configs(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         result = base.copy()
 
         for key, value in override.items():
@@ -71,7 +71,7 @@ class ConfigManager:
 
         return result
 
-    def _get_hardcoded_defaults(self) -> dict[str, Any]:
+    def _get_hardcoded_defaults(self) -> Dict[str, Any]:
         return {
             "general": {
                 "source_directory": ".",
@@ -194,7 +194,7 @@ class ConfigManager:
 
         logger.info(f"Configuration exported to {path}")
 
-    def update_from_args(self, args: dict[str, Any]) -> None:
+    def update_from_args(self, args: Dict[str, Any]) -> None:
         if args.get("source"):
             self.set("general.source_directory", args["source"])
         if args.get("destination"):
