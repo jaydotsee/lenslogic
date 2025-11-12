@@ -3,12 +3,12 @@ name = "lenslogic"
 version = "1.0.2"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.8"
 dependencies = []
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py38"
 
 [tool.ruff.lint]
 select = [
@@ -21,6 +21,10 @@ select = [
 ]
 ignore = [
     "E501",  # Line too long - let ruff-format handle it
+    "UP006", # Use `dict` instead of `Dict` - not compatible with Python 3.8
+    "UP007", # Use `X | Y` for type annotations - not compatible with Python 3.8
+    "UP035", # `typing.Dict` is deprecated - not in Python 3.8
+    "UP045", # Use `X | None` instead of `Optional[X]` - not compatible with Python 3.8
 ]
 
 [tool.ruff.lint.per-file-ignores]
