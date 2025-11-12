@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional, Tuple
 
 import exif
 from PIL import Image
@@ -14,7 +14,7 @@ class ExifExtractor:
     def __init__(self):
         self.cache = {}
 
-    def extract_metadata(self, file_path: str) -> dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
         file_path_obj = Path(file_path)
 
         if str(file_path_obj) in self.cache:
@@ -74,7 +74,7 @@ class ExifExtractor:
         }
         return file_path.suffix.lower() in supported_extensions
 
-    def _extract_exif_data(self, file_path: Path) -> dict[str, Any]:
+    def _extract_exif_data(self, file_path: Path) -> Dict[str, Any]:
         exif_dict = {}
 
         try:
@@ -164,7 +164,7 @@ class ExifExtractor:
 
         return exif_dict
 
-    def _extract_gps_data(self, file_path: Path) -> dict[str, Any] | None:
+    def _extract_gps_data(self, file_path: Path) -> Optional[Dict[str, Any]]:
         gps_data = {}
 
         try:
@@ -241,7 +241,7 @@ class ExifExtractor:
 
         return gps_data if gps_data else None
 
-    def _extract_additional_metadata(self, file_path: Path) -> dict[str, Any]:
+    def _extract_additional_metadata(self, file_path: Path) -> Dict[str, Any]:
         metadata = {}
 
         try:
@@ -264,7 +264,7 @@ class ExifExtractor:
 
         return metadata
 
-    def _parse_datetime(self, datetime_string: str) -> datetime | None:
+    def _parse_datetime(self, datetime_string: str) -> Optional[datetime]:
         if not datetime_string:
             return None
 
@@ -287,9 +287,9 @@ class ExifExtractor:
         logger.debug(f"Could not parse datetime: {datetime_string}")
         return None
 
-    def _convert_gps_coordinates(self, coord_tuple: tuple, ref: str) -> float | None:
+    def _convert_gps_coordinates(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
         try:
-            if isinstance(coord_tuple, list | tuple) and len(coord_tuple) >= 3:
+            if isinstance(coord_tuple, (list, tuple)) and len(coord_tuple) >= 3:
                 degrees = float(coord_tuple[0])
                 minutes = float(coord_tuple[1])
                 seconds = float(coord_tuple[2])
@@ -306,7 +306,7 @@ class ExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def _convert_gps_coordinates_pil(self, coord_tuple: tuple, ref: str) -> float | None:
+    def _convert_gps_coordinates_pil(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
         try:
             degrees = coord_tuple[0]
             minutes = coord_tuple[1]
@@ -329,7 +329,7 @@ class ExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
+    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         date_sources = [
             "datetime_original",
             "datetime_digitized",

@@ -1,7 +1,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from rich.console import Console
 from rich.panel import Panel
@@ -162,7 +162,7 @@ class ProgressTracker:
     def print_dry_run(self, message: str):
         self.console.print(f"[cyan][DRY RUN][/cyan] {message}")
 
-    def display_file_preview(self, original: str, new_name: str, destination: str, metadata: dict[str, Any]):
+    def display_file_preview(self, original: str, new_name: str, destination: str, metadata: Dict[str, Any]):
         panel_content = f"""
 [bold]Original:[/bold] {Path(original).name}
 [bold]New Name:[/bold] {new_name}
@@ -187,7 +187,7 @@ class ProgressTracker:
 
         self.console.print(panel)
 
-    def create_statistics_table(self, stats: dict[str, Any]) -> Table:
+    def create_statistics_table(self, stats: Dict[str, Any]) -> Table:
         table = Table(title="Library Statistics", show_header=True, header_style="bold magenta")
 
         table.add_column("File Type", style="cyan")

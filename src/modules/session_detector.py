@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class SessionDetector:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.session_config = config.get("session_detection", {})
         self.time_gap_minutes = self.session_config.get("time_gap_minutes", 30)
@@ -15,7 +15,7 @@ class SessionDetector:
         self.same_location_threshold_km = self.session_config.get("same_location_threshold_km", 1.0)
         self.enable_location_grouping = self.session_config.get("enable_location_grouping", True)
 
-    def detect_sessions(self, photos_metadata: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def detect_sessions(self, photos_metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Detect shooting sessions from a list of photo metadata"""
         if not photos_metadata:
             return []
@@ -59,7 +59,7 @@ class SessionDetector:
         logger.info(f"Detected {len(sessions)} shooting sessions from {len(photos_metadata)} photos")
         return sessions
 
-    def _get_capture_time(self, metadata: dict[str, Any]) -> datetime | None:
+    def _get_capture_time(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         """Extract capture time from metadata"""
         time_fields = [
             "datetime_original",
@@ -84,8 +84,8 @@ class SessionDetector:
         self,
         last_time: datetime,
         current_time: datetime,
-        current_session: list[dict[str, Any]],
-        current_photo: dict[str, Any],
+        current_session: List[Dict[str, Any]],
+        current_photo: Dict[str, Any],
     ) -> bool:
         """Determine if current photo belongs to the same session"""
         # Check time gap
@@ -100,7 +100,7 @@ class SessionDetector:
 
         return True
 
-    def _is_same_location(self, current_session: list[dict[str, Any]], current_photo: dict[str, Any]) -> bool:
+    def _is_same_location(self, current_session: List[Dict[str, Any]], current_photo: Dict[str, Any]) -> bool:
         """Check if current photo is at the same location as session"""
         current_gps = current_photo.get("gps")
         if not current_gps:
@@ -147,7 +147,7 @@ class SessionDetector:
 
         return earth_radius_km * c
 
-    def _create_session_info(self, session_photos: list[dict[str, Any]]) -> dict[str, Any]:
+    def _create_session_info(self, session_photos: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Create session information from list of photos"""
         start_time = self._get_capture_time(session_photos[0])
         end_time = self._get_capture_time(session_photos[-1])
@@ -202,7 +202,7 @@ class SessionDetector:
             "file_paths": [photo["file_path"] for photo in session_photos],
         }
 
-    def _generate_session_name(self, session: dict[str, Any], session_number: int) -> str:
+    def _generate_session_name(self, session: Dict[str, Any], session_number: int) -> str:
         """Generate a descriptive name for the session"""
         start_time = session["start_time"]
         location_name = session.get("location_name")
@@ -231,11 +231,11 @@ class SessionDetector:
 
     def organize_by_sessions(
         self,
-        sessions: list[dict[str, Any]],
+        sessions: List[Dict[str, Any]],
         base_output_dir: str,
         session_folder_pattern: str = "{session_name}",
         dry_run: bool = False,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Organize photos into session-based folder structure"""
         result = {
             "sessions_processed": 0,
@@ -268,7 +268,7 @@ class SessionDetector:
 
         return result
 
-    def get_session_statistics(self, sessions: list[dict[str, Any]]) -> dict[str, Any]:
+    def get_session_statistics(self, sessions: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate statistics about detected sessions"""
         if not sessions:
             return {"total_sessions": 0}

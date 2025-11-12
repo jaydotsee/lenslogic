@@ -2,7 +2,7 @@ import logging
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="pymediainfo")
@@ -25,7 +25,7 @@ class EnhancedVideoExtractor:
         self.cache = {}
         self.supported_formats = self._get_supported_formats()
 
-    def _get_supported_formats(self) -> list[str]:
+    def _get_supported_formats(self) -> List[str]:
         """Get list of supported video formats"""
         if MEDIAINFO_AVAILABLE:
             # Professional video formats supported by MediaInfo
@@ -80,7 +80,7 @@ class EnhancedVideoExtractor:
         else:
             return "Basic (Limited)"
 
-    def get_mediainfo_version(self) -> str | None:
+    def get_mediainfo_version(self) -> Optional[str]:
         """Get MediaInfo library version"""
         if MEDIAINFO_AVAILABLE:
             try:
@@ -91,11 +91,11 @@ class EnhancedVideoExtractor:
                 return "Unknown"
         return None
 
-    def get_supported_formats(self) -> list[str]:
+    def get_supported_formats(self) -> List[str]:
         """Get list of supported video formats"""
         return self.supported_formats.copy()
 
-    def extract_metadata(self, file_path: str) -> dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
         """Extract comprehensive metadata from video file"""
         file_path_obj = Path(file_path)
 
@@ -122,7 +122,7 @@ class EnhancedVideoExtractor:
         self.cache[cache_key] = metadata.copy()
         return metadata
 
-    def _initialize_basic_metadata(self, file_path: Path) -> dict[str, Any]:
+    def _initialize_basic_metadata(self, file_path: Path) -> Dict[str, Any]:
         """Initialize basic file metadata"""
         return {
             "file_path": str(file_path),
@@ -133,7 +133,7 @@ class EnhancedVideoExtractor:
             "file_created": (datetime.fromtimestamp(file_path.stat().st_ctime) if file_path.exists() else None),
         }
 
-    def _extract_with_mediainfo(self, file_path: str) -> dict[str, Any]:
+    def _extract_with_mediainfo(self, file_path: str) -> Dict[str, Any]:
         """Extract metadata using PyMediaInfo"""
         metadata = {}
 
@@ -154,7 +154,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_general_track(self, track) -> dict[str, Any]:
+    def _process_general_track(self, track) -> Dict[str, Any]:
         """Process general track information"""
         metadata = {}
 
@@ -205,7 +205,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_video_track(self, track) -> dict[str, Any]:
+    def _process_video_track(self, track) -> Dict[str, Any]:
         """Process video track information"""
         metadata = {}
 
@@ -253,7 +253,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _process_audio_track(self, track) -> dict[str, Any]:
+    def _process_audio_track(self, track) -> Dict[str, Any]:
         """Process audio track information"""
         metadata = {}
 
@@ -279,7 +279,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _extract_basic_metadata(self, file_path: Path) -> dict[str, Any]:
+    def _extract_basic_metadata(self, file_path: Path) -> Dict[str, Any]:
         """Extract basic metadata when MediaInfo is not available"""
         metadata = {}
 
@@ -297,7 +297,7 @@ class EnhancedVideoExtractor:
 
         return metadata
 
-    def _parse_mediainfo_datetime(self, date_str: str) -> datetime | None:
+    def _parse_mediainfo_datetime(self, date_str: str) -> Optional[datetime]:
         """Parse datetime from MediaInfo output"""
         if not date_str:
             return None
@@ -348,7 +348,7 @@ class EnhancedVideoExtractor:
         except (ValueError, TypeError):
             return "Unknown"
 
-    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
+    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         """Get the best available capture datetime for video"""
         date_sources = [
             "datetime_original",

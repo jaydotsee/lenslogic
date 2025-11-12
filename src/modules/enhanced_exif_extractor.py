@@ -3,7 +3,7 @@ import re
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import exif
 from PIL import Image
@@ -110,7 +110,7 @@ class EnhancedExifExtractor:
             except Exception:
                 pass
 
-    def extract_metadata(self, file_path: str) -> dict[str, Any]:
+    def extract_metadata(self, file_path: str) -> Dict[str, Any]:
         """Extract comprehensive metadata using appropriate extractor (photo/video)"""
         file_path_obj = Path(file_path)
 
@@ -161,7 +161,7 @@ class EnhancedExifExtractor:
         self.cache[str(file_path_obj)] = metadata
         return metadata
 
-    def _extract_with_exiftool(self, file_path: Path) -> dict[str, Any]:
+    def _extract_with_exiftool(self, file_path: Path) -> Dict[str, Any]:
         """Extract metadata using PyExifTool"""
         try:
             # Get all metadata from ExifTool
@@ -238,7 +238,7 @@ class EnhancedExifExtractor:
                 for field in fields:
                     if field in exif_data:
                         value = exif_data[field]
-                        if isinstance(value, int | float) or (
+                        if isinstance(value, (int, float)) or (
                             isinstance(value, str) and value.replace(".", "").isdigit()
                         ):
                             try:
@@ -282,7 +282,7 @@ class EnhancedExifExtractor:
             logger.error(f"ExifTool extraction failed for {file_path}: {e}")
             return {}
 
-    def _extract_gps_with_exiftool(self, exif_data: dict) -> dict[str, Any] | None:
+    def _extract_gps_with_exiftool(self, exif_data: Dict) -> Optional[Dict[str, Any]]:
         """Extract GPS data using ExifTool"""
         gps_data = {}
 
@@ -342,7 +342,7 @@ class EnhancedExifExtractor:
 
         return gps_data if gps_data else None
 
-    def _extract_professional_metadata(self, exif_data: dict) -> dict[str, Any]:
+    def _extract_professional_metadata(self, exif_data: Dict) -> Dict[str, Any]:
         """Extract professional/advanced metadata fields"""
         metadata = {}
 
@@ -407,7 +407,7 @@ class EnhancedExifExtractor:
         # Flash information
         if "EXIF:Flash" in exif_data:
             flash_value = exif_data["EXIF:Flash"]
-            metadata["flash_fired"] = bool(int(flash_value) & 1) if isinstance(flash_value, int | str) else False
+            metadata["flash_fired"] = bool(int(flash_value) & 1) if isinstance(flash_value, (int, str)) else False
 
         flash_fields = {
             "flash_mode": ["MakerNotes:FlashMode"],
@@ -433,7 +433,7 @@ class EnhancedExifExtractor:
 
         return metadata
 
-    def _parse_exiftool_datetime(self, datetime_string: str) -> datetime | None:
+    def _parse_exiftool_datetime(self, datetime_string: str) -> Optional[datetime]:
         """Parse datetime from ExifTool output"""
         if not datetime_string:
             return None
@@ -522,7 +522,7 @@ class EnhancedExifExtractor:
         }
         return file_path.suffix.lower() in supported_extensions
 
-    def _extract_with_legacy_methods(self, file_path: Path) -> dict[str, Any]:
+    def _extract_with_legacy_methods(self, file_path: Path) -> Dict[str, Any]:
         """Fallback to legacy EXIF extraction methods"""
         logger.debug(f"Using legacy EXIF extraction for {file_path}")
 
@@ -621,10 +621,10 @@ class EnhancedExifExtractor:
 
         return metadata
 
-    def _convert_gps_coordinates(self, coord_tuple: tuple, ref: str) -> float | None:
+    def _convert_gps_coordinates(self, coord_tuple: Tuple, ref: str) -> Optional[float]:
         """Convert GPS coordinates to decimal degrees"""
         try:
-            if isinstance(coord_tuple, list | tuple) and len(coord_tuple) >= 3:
+            if isinstance(coord_tuple, (list, tuple)) and len(coord_tuple) >= 3:
                 degrees = float(coord_tuple[0])
                 minutes = float(coord_tuple[1])
                 seconds = float(coord_tuple[2])
@@ -641,7 +641,7 @@ class EnhancedExifExtractor:
             logger.debug(f"Could not convert GPS coordinates: {e}")
             return None
 
-    def get_capture_datetime(self, metadata: dict[str, Any]) -> datetime | None:
+    def get_capture_datetime(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         """Get the best available capture datetime"""
         date_sources = [
             "datetime_original",
@@ -661,7 +661,7 @@ class EnhancedExifExtractor:
         """Clear the metadata cache"""
         self.cache.clear()
 
-    def get_supported_formats(self) -> list[str]:
+    def get_supported_formats(self) -> List[str]:
         """Get list of supported file formats"""
         if EXIFTOOL_AVAILABLE:
             return [
@@ -747,7 +747,7 @@ class EnhancedExifExtractor:
         else:
             return "Legacy (Basic)"
 
-    def get_exiftool_version(self) -> str | None:
+    def get_exiftool_version(self) -> Optional[str]:
         """Get ExifTool version if available"""
         if EXIFTOOL_AVAILABLE and self.exiftool_session:
             try:
@@ -757,7 +757,7 @@ class EnhancedExifExtractor:
                 return "Unknown"
         return None
 
-    def _extract_video_metadata(self, file_path: Path) -> dict[str, Any]:
+    def _extract_video_metadata(self, file_path: Path) -> Dict[str, Any]:
         """Extract metadata from video files using enhanced video extractor"""
         if self.video_extractor:
             try:

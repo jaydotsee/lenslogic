@@ -1,6 +1,7 @@
 import hashlib
 import logging
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from PIL import Image
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class DuplicateDetector:
-    def __init__(self, config: dict):
+    def __init__(self, config: Dict):
         self.config = config.get("duplicate_detection", {})
         self.method = self.config.get("method", "hash")
         self.threshold = self.config.get("threshold", 0.95)
@@ -17,7 +18,7 @@ class DuplicateDetector:
         self.duplicate_folder = self.config.get("duplicate_folder", "DUPLICATES")
         self.hash_cache = {}
 
-    def find_duplicates(self, file_paths: list[str]) -> dict[str, list[str]]:
+    def find_duplicates(self, file_paths: List[str]) -> Dict[str, List[str]]:
         duplicates = {}
 
         if self.method == "hash":
@@ -29,7 +30,7 @@ class DuplicateDetector:
 
         return duplicates
 
-    def _find_by_hash(self, file_paths: list[str]) -> dict[str, list[str]]:
+    def _find_by_hash(self, file_paths: List[str]) -> Dict[str, List[str]]:
         hash_groups = {}
 
         for file_path in file_paths:
@@ -44,7 +45,7 @@ class DuplicateDetector:
 
         return duplicates
 
-    def _calculate_file_hash(self, file_path: str) -> str | None:
+    def _calculate_file_hash(self, file_path: str) -> Optional[str]:
         if file_path in self.hash_cache:
             return self.hash_cache[file_path]
 
@@ -62,7 +63,7 @@ class DuplicateDetector:
             logger.error(f"Error calculating hash for {file_path}: {e}")
             return None
 
-    def _find_by_pixels(self, file_paths: list[str]) -> dict[str, list[str]]:
+    def _find_by_pixels(self, file_paths: List[str]) -> Dict[str, List[str]]:
         duplicates = {}
         processed = set()
         image_data_cache = {}
@@ -96,7 +97,7 @@ class DuplicateDetector:
 
         return duplicates
 
-    def _get_image_array(self, file_path: str, cache: dict) -> np.ndarray | None:
+    def _get_image_array(self, file_path: str, cache: Dict) -> Optional[np.ndarray]:
         if file_path in cache:
             return cache[file_path]
 
@@ -127,7 +128,7 @@ class DuplicateDetector:
             logger.debug(f"Error comparing images: {e}")
             return False
 
-    def _find_by_histogram(self, file_paths: list[str]) -> dict[str, list[str]]:
+    def _find_by_histogram(self, file_paths: List[str]) -> Dict[str, List[str]]:
         duplicates = {}
         processed = set()
         histogram_cache = {}
@@ -161,7 +162,7 @@ class DuplicateDetector:
 
         return duplicates
 
-    def _calculate_histogram(self, file_path: str, cache: dict) -> np.ndarray | None:
+    def _calculate_histogram(self, file_path: str, cache: Dict) -> Optional[np.ndarray]:
         if file_path in cache:
             return cache[file_path]
 
@@ -213,7 +214,7 @@ class DuplicateDetector:
 
         return False
 
-    def handle_duplicate(self, original: str, duplicate: str, destination_base: str) -> tuple[str, str]:
+    def handle_duplicate(self, original: str, duplicate: str, destination_base: str) -> Tuple[str, str]:
         if self.action == "skip":
             return "skip", f"Skipping duplicate: {duplicate}"
 

@@ -3,7 +3,7 @@ import random
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 from pathvalidate import sanitize_filename
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class FileRenamer:
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.naming_config = config.get("naming", {})
         self.pattern = self.naming_config.get("pattern", "{year}{month:02d}{day:02d}_{original_name}")
@@ -25,8 +25,8 @@ class FileRenamer:
     def generate_new_name(
         self,
         file_path: str,
-        metadata: dict[str, Any],
-        destination_folder: str | None = None,
+        metadata: Dict[str, Any],
+        destination_folder: Optional[str] = None,
     ) -> str:
         file_path_obj = Path(file_path)
         original_name = file_path_obj.stem
@@ -56,7 +56,7 @@ class FileRenamer:
 
         return final_name
 
-    def _get_datetime_from_metadata(self, metadata: dict[str, Any]) -> datetime | None:
+    def _get_datetime_from_metadata(self, metadata: Dict[str, Any]) -> Optional[datetime]:
         date_sources = self.config.get("organization", {}).get(
             "date_sources",
             [
@@ -113,10 +113,10 @@ class FileRenamer:
     def _create_template_variables(
         self,
         file_path: Path,
-        metadata: dict[str, Any],
+        metadata: Dict[str, Any],
         capture_datetime: datetime,
         original_name: str,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         variables = {
             "original_name": original_name,
             "original_sequence": self._extract_original_sequence(original_name),
@@ -181,7 +181,7 @@ class FileRenamer:
         # Use the new slugger with both make and model for better pattern matching
         return get_camera_slug(camera_make, camera_model, self.camera_names)
 
-    def _format_pattern(self, pattern: str, variables: dict[str, Any]) -> str:
+    def _format_pattern(self, pattern: str, variables: Dict[str, Any]) -> str:
         try:
             formatted = pattern.format(**variables)
 
@@ -240,7 +240,7 @@ class FileRenamer:
     def reset_counters(self):
         self.counters.clear()
 
-    def preview_rename(self, file_path: str, metadata: dict[str, Any]) -> dict[str, str | bool]:
+    def preview_rename(self, file_path: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
         original_path = Path(file_path)
         new_name = self.generate_new_name(file_path, metadata)
 

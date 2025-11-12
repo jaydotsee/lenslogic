@@ -9,7 +9,7 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from rich.console import Console
 from rich.progress import Progress
@@ -36,7 +36,7 @@ class PhotoMetadata:
     software: str = ""
     artist: str = ""
     copyright: str = ""
-    keywords: list[str] | None = None
+    keywords: Optional[List[str]] = None
     rating: str = ""
     color_space: str = ""
     bit_depth: str = ""
@@ -56,12 +56,12 @@ class PhotoMetadata:
 class XMPAnalyzer:
     """Analyzes photo libraries using XMP sidecar files"""
 
-    def __init__(self, console: Console | None = None):
+    def __init__(self, console: Optional[Console] = None):
         self.console = console or Console()
-        self.photos: list[PhotoMetadata] = []
+        self.photos: List[PhotoMetadata] = []
         self.total_files_processed = 0
         self.xmp_files_found = 0
-        self.errors: list[tuple[str, str]] = []
+        self.errors: List[Tuple[str, str]] = []
 
         # XMP namespace mappings
         self.namespaces = {
@@ -78,7 +78,7 @@ class XMPAnalyzer:
             "xmpMM": "http://ns.adobe.com/xap/1.0/mm/",
         }
 
-    def analyze_library(self, root_directory: str, output_dir: str | None = None) -> dict[str, Any]:
+    def analyze_library(self, root_directory: str, output_dir: Optional[str] = None) -> Dict[str, Any]:
         """
         Analyze a photo library by scanning XMP files
 
@@ -133,14 +133,14 @@ class XMPAnalyzer:
 
         return analysis
 
-    def _find_xmp_files(self, root_path: Path) -> list[Path]:
+    def _find_xmp_files(self, root_path: Path) -> List[Path]:
         """Find all XMP files in the directory tree"""
         xmp_files = []
         for path in root_path.rglob("*.xmp"):
             xmp_files.append(path)
         return sorted(xmp_files)
 
-    def _parse_xmp_file(self, xmp_path: Path) -> PhotoMetadata | None:
+    def _parse_xmp_file(self, xmp_path: Path) -> Optional[PhotoMetadata]:
         """Parse an XMP file and extract metadata"""
         try:
             # Get associated media file info
@@ -183,7 +183,7 @@ class XMPAnalyzer:
         except Exception as e:
             raise Exception(f"Failed to parse XMP file: {e}") from e
 
-    def _find_associated_media_file(self, xmp_path: Path) -> Path | None:
+    def _find_associated_media_file(self, xmp_path: Path) -> Optional[Path]:
         """Find the media file associated with an XMP sidecar"""
         base_name = xmp_path.stem
         parent_dir = xmp_path.parent
@@ -392,7 +392,7 @@ class XMPAnalyzer:
                     keywords.append(li.text.strip())
             metadata.keywords = keywords
 
-    def _generate_analysis(self) -> dict[str, Any]:
+    def _generate_analysis(self) -> Dict[str, Any]:
         """Generate comprehensive analysis from collected metadata"""
         if not self.photos:
             return self._create_empty_report()
@@ -413,7 +413,7 @@ class XMPAnalyzer:
 
         return analysis
 
-    def _analyze_summary(self) -> dict[str, Any]:
+    def _analyze_summary(self) -> Dict[str, Any]:
         """Generate summary statistics"""
         total_photos = len(self.photos)
         photos_with_gps = len([p for p in self.photos if p.gps_latitude and p.gps_longitude])
@@ -433,7 +433,7 @@ class XMPAnalyzer:
             "location_coverage_percentage": ((photos_with_location / total_photos * 100) if total_photos > 0 else 0),
         }
 
-    def _analyze_cameras(self) -> dict[str, Any]:
+    def _analyze_cameras(self) -> Dict[str, Any]:
         """Analyze camera usage patterns"""
         camera_counts = Counter()
         make_counts = Counter()
@@ -459,7 +459,7 @@ class XMPAnalyzer:
             "most_used_make": make_counts.most_common(1)[0] if make_counts else None,
         }
 
-    def _analyze_lenses(self) -> dict[str, Any]:
+    def _analyze_lenses(self) -> Dict[str, Any]:
         """Analyze lens usage patterns"""
         lens_counts = Counter()
         focal_length_counts = Counter()
@@ -494,7 +494,7 @@ class XMPAnalyzer:
             "most_used_lens": lens_counts.most_common(1)[0] if lens_counts else None,
         }
 
-    def _analyze_locations(self) -> dict[str, Any]:
+    def _analyze_locations(self) -> Dict[str, Any]:
         """Analyze location patterns"""
         city_counts = Counter()
         country_counts = Counter()
@@ -523,7 +523,7 @@ class XMPAnalyzer:
             "most_photographed_country": (country_counts.most_common(1)[0] if country_counts else None),
         }
 
-    def _analyze_exposure_settings(self) -> dict[str, Any]:
+    def _analyze_exposure_settings(self) -> Dict[str, Any]:
         """Analyze exposure settings patterns"""
         f_number_counts = Counter()
         iso_counts = Counter()
@@ -545,7 +545,7 @@ class XMPAnalyzer:
             "most_used_iso": iso_counts.most_common(1)[0] if iso_counts else None,
         }
 
-    def _analyze_temporal_patterns(self) -> dict[str, Any]:
+    def _analyze_temporal_patterns(self) -> Dict[str, Any]:
         """Analyze temporal shooting patterns"""
         years = Counter()
         months = Counter()
@@ -582,7 +582,7 @@ class XMPAnalyzer:
             "most_active_day": days_of_week.most_common(1)[0] if days_of_week else None,
         }
 
-    def _analyze_technical_specs(self) -> dict[str, Any]:
+    def _analyze_technical_specs(self) -> Dict[str, Any]:
         """Analyze technical specifications"""
         resolutions = Counter()
         bit_depths = Counter()
@@ -615,7 +615,7 @@ class XMPAnalyzer:
             "largest_file_size_mb": (max(file_sizes) / (1024 * 1024) if file_sizes else 0),
         }
 
-    def _analyze_video_content(self) -> dict[str, Any]:
+    def _analyze_video_content(self) -> Dict[str, Any]:
         """Analyze video-specific content"""
         video_codecs = Counter()
         framerates = Counter()
@@ -649,7 +649,7 @@ class XMPAnalyzer:
             "average_video_length_seconds": (sum(durations) / len(durations) if durations else 0),
         }
 
-    def _analyze_creators(self) -> dict[str, Any]:
+    def _analyze_creators(self) -> Dict[str, Any]:
         """Analyze creator and software information"""
         software_counts = Counter()
         creator_counts = Counter()
@@ -666,7 +666,7 @@ class XMPAnalyzer:
             "most_used_software": (software_counts.most_common(1)[0] if software_counts else None),
         }
 
-    def _analyze_keywords(self) -> dict[str, Any]:
+    def _analyze_keywords(self) -> Dict[str, Any]:
         """Analyze keywords and tags"""
         all_keywords = []
         for photo in self.photos:
@@ -682,7 +682,7 @@ class XMPAnalyzer:
             "most_used_keyword": (keyword_counts.most_common(1)[0] if keyword_counts else None),
         }
 
-    def _analyze_files(self) -> dict[str, Any]:
+    def _analyze_files(self) -> Dict[str, Any]:
         """Analyze file organization patterns"""
         folder_counts = Counter()
         file_extensions = Counter()
@@ -701,7 +701,7 @@ class XMPAnalyzer:
             "most_populated_folder": (folder_counts.most_common(1)[0] if folder_counts else None),
         }
 
-    def _create_empty_report(self) -> dict[str, Any]:
+    def _create_empty_report(self) -> Dict[str, Any]:
         """Create an empty report structure"""
         return {
             "summary": {"total_files": 0, "xmp_files_found": 0},
@@ -717,7 +717,7 @@ class XMPAnalyzer:
             "file_analysis": {},
         }
 
-    def _save_detailed_reports(self, analysis: dict[str, Any], output_dir: str):
+    def _save_detailed_reports(self, analysis: Dict[str, Any], output_dir: str):
         """Save detailed analysis reports"""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -747,7 +747,7 @@ class XMPAnalyzer:
                     row["keywords"] = "; ".join(row["keywords"]) if row["keywords"] else ""
                     writer.writerow(row)
 
-    def display_analysis(self, analysis: dict[str, Any]):
+    def display_analysis(self, analysis: Dict[str, Any]):
         """Display analysis results in a formatted way"""
         self._display_summary(analysis["summary"])
         self._display_cameras(analysis["cameras"])
@@ -760,7 +760,7 @@ class XMPAnalyzer:
         if analysis["video_analysis"].get("video_codec_distribution"):
             self._display_video_analysis(analysis["video_analysis"])
 
-    def _display_summary(self, summary: dict[str, Any]):
+    def _display_summary(self, summary: Dict[str, Any]):
         """Display summary statistics"""
         table = Table(title="📊 Library Summary", show_header=True, header_style="bold cyan")
         table.add_column("Metric", style="bold")
@@ -780,7 +780,7 @@ class XMPAnalyzer:
         self.console.print(table)
         self.console.print()
 
-    def _display_cameras(self, cameras: dict[str, Any]):
+    def _display_cameras(self, cameras: Dict[str, Any]):
         """Display camera statistics"""
         if not cameras.get("camera_distribution"):
             return
@@ -799,7 +799,7 @@ class XMPAnalyzer:
         self.console.print(table)
         self.console.print()
 
-    def _display_lenses(self, lenses: dict[str, Any]):
+    def _display_lenses(self, lenses: Dict[str, Any]):
         """Display lens statistics"""
         if not lenses.get("lens_distribution"):
             return
@@ -830,7 +830,7 @@ class XMPAnalyzer:
             self.console.print(focal_table)
             self.console.print()
 
-    def _display_locations(self, locations: dict[str, Any]):
+    def _display_locations(self, locations: Dict[str, Any]):
         """Display location statistics"""
         if locations.get("country_distribution"):
             table = Table(
@@ -847,7 +847,7 @@ class XMPAnalyzer:
             self.console.print(table)
             self.console.print()
 
-    def _display_exposure_settings(self, exposure: dict[str, Any]):
+    def _display_exposure_settings(self, exposure: Dict[str, Any]):
         """Display exposure settings statistics"""
         if exposure.get("most_used_aperture"):
             table = Table(
@@ -870,7 +870,7 @@ class XMPAnalyzer:
             self.console.print(table)
             self.console.print()
 
-    def _display_temporal_analysis(self, temporal: dict[str, Any]):
+    def _display_temporal_analysis(self, temporal: Dict[str, Any]):
         """Display temporal analysis"""
         if temporal.get("most_active_year"):
             table = Table(
@@ -897,7 +897,7 @@ class XMPAnalyzer:
             self.console.print(table)
             self.console.print()
 
-    def _display_technical_specs(self, technical: dict[str, Any]):
+    def _display_technical_specs(self, technical: Dict[str, Any]):
         """Display technical specifications"""
         table = Table(
             title="⚙️  Technical Specifications",
@@ -914,7 +914,7 @@ class XMPAnalyzer:
         self.console.print(table)
         self.console.print()
 
-    def _display_video_analysis(self, video: dict[str, Any]):
+    def _display_video_analysis(self, video: Dict[str, Any]):
         """Display video analysis"""
         table = Table(title="🎬 Video Content", show_header=True, header_style="bold cyan")
         table.add_column("Metric", style="bold")
